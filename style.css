@@ -1149,3 +1149,10 @@ canvas.pp3d { display: block; width: 100% !important; height: 100% !important; m
 .bay-art span { position: absolute; width: 34px; background: #7bd148; border: 2.5px solid var(--edge); border-radius: 6px; }
 .bay-art .p1 { left: 70%; top: -10px; height: 52px; } .bay-art .p2 { left: 70%; bottom: -10px; height: 52px; background: #ff6fb5; }
 .bay-art b { position: absolute; font-size: 26px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #ffc93d; border: 2.5px solid var(--edge); }
+/* ô cờ luôn vuông đều, quân cờ không làm giãn hàng/cột */
+.cboard { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); grid-template-rows: repeat(var(--n), minmax(0, 1fr)); }
+.cboard > i { overflow: hidden; }
+.cboard > i svg { position: absolute; inset: 9%; width: 82%; height: 82%; }
+/* chắc chắn trên mọi trình duyệt (kể cả Safari): mỗi ô tự vuông theo bề ngang, hàng không phụ thuộc chiều cao bàn */
+.cboard { aspect-ratio: auto; grid-template-rows: none; grid-auto-rows: auto; }
+.cboard > i { aspect-ratio: 1 / 1; height: auto; }
