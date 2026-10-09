@@ -10,4 +10,11 @@ npx esbuild src/nhanvat.js --bundle --format=iife --target=es2020 --legal-commen
 npx esbuild src/nhai/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/nhai.js
 npx esbuild src/caro/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/caro.js
 npx esbuild src/bay/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/bay.js
+npx esbuild src/covua/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/covua.js
+npx esbuild src/cotuong/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/cotuong.js
+npx esbuild src/motla/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/motla.js
+npx esbuild src/cangua/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/cangua.js
+npx esbuild src/typhu/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/typhu.js
+npx esbuild src/fight/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/quyen.js
+npx esbuild src/race/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/duaxe.js
 echo "Xong! Đã cập nhật assets/"

@@ -3,6 +3,17 @@ import { ICONS, roleBadge } from './roles.js';
 import { $, $$, esc, loadProfile, saveProfile, avatarHTML, avatarPicker } from './common.js';
 import { profileChip, requireProfile, startPresence } from './site.js';
 import { createPuppet } from './dienta/puppet3d.js';
+import { chessBoard, xqBoard } from './duel/boards.js';
+import { fromFEN } from './duel/chess.js';
+import { init as xqInit } from './duel/xiangqi.js';
+import { cardHTML as motlaCard } from './motla/view.js';
+import { dieHTML as ludoDie } from './cangua/view.js';
+import { render as fightRender, FX as FightFX } from './fight/render.js';
+import { initState as fightInit } from './fight/sim.js';
+import { render as raceRender, FX as RaceFX } from './race/render.js';
+import { initState as raceInit } from './race/sim.js';
+const raceArt = (c) => { const S = raceInit(['cub', 'lam'], { seed: 3, time: 60 }); S.phase = 'race'; S.c[0].x = 1150 * 100; S.c[1].x = 1320 * 100; S.c[0].l = 110 * 100; S.c[1].l = 190 * 100; S.camX = 1100 * 100; raceRender(c, S, new RaceFX(), 30, { names: ['', ''], riders: ['🐧', '🦖'], crowd: [], me: 0 }); };
+const fightArt = (c) => { const S = fightInit(['teo', 'sam'], {}); S.phase = 'fight'; S.f[0].x = 400 * 100; S.f[1].x = 560 * 100; S.f[0].st = 'win'; fightRender(c, S, new FightFX(), 30, { names: ['', ''], crowd: ['🦊', '🐼', '🐸'] }); };
 
 // Danh sách game — thêm game mới vào đây
 const GAMES = [
@@ -29,6 +40,48 @@ const GAMES = [
     tag: 'Đối kháng · Trí tuệ', players: '2 chơi + 8 xem', time: '5–15 phút',
     desc: 'Xếp đủ 5 quân liên tiếp để thắng. 2 người ngồi ghế đấu nhau, tối đa 8 người vào xem, chat và cổ vũ.',
     art: (el) => { el.innerHTML = '<div class="caro-art">' + Array.from({ length: 25 }, (_, i) => { const m = { 6: 'X', 7: 'O', 12: 'X', 13: 'O', 18: 'X', 8: 'O', 24: 'X', 0: 'X' }[i]; return `<i class="${m || ''}">${m === 'X' ? '✕' : m === 'O' ? '○' : ''}</i>`; }).join('') + '</div>'; },
+  },
+  {
+    id: 'cotuong', url: 'cotuong.html', name: 'Cờ Tướng', color: 'var(--coral)', soft: 'var(--coral-soft)', isNew: true,
+    tag: 'Đối kháng · Mưu lược', players: '2 chơi + 8 xem', time: '15–40 phút',
+    desc: 'Cờ tướng đầy đủ luật, có đồng hồ, biên bản nước đi. Xem quân bằng chữ Hán hoặc chữ Việt. 8 người vào xem và cổ vũ.',
+    art: (el) => { el.innerHTML = '<div class="xq-art"></div>'; xqBoard.render(el.firstChild, { st: xqInit(), flip: false, sel: -1, targets: [], last: null, check: -1, view: 'han' }); },
+  },
+  {
+    id: 'covua', url: 'covua.html', name: 'Cờ Vua', color: 'var(--sky)', soft: 'var(--sky-soft)', isNew: true,
+    tag: 'Đối kháng · Chiến thuật', players: '2 chơi + 8 xem', time: '10–30 phút',
+    desc: 'Cờ vua quốc tế đầy đủ luật: nhập thành, bắt tốt qua đường, phong cấp. Đồng hồ cho mỗi bên, 8 người vào xem.',
+    art: (el) => { el.innerHTML = '<div class="cv-art"></div>'; chessBoard.render(el.firstChild, { st: fromFEN('r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4'), flip: false, sel: -1, targets: [], last: { from: 31, to: 13 }, check: 4 }); },
+  },
+  {
+    id: 'duaxe', url: 'duaxe.html', name: 'Đua Xe Đường Làng', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,
+    tag: 'Đua xe · Húc nhau', players: '2 đua + 8 xem', time: '1–3 phút/lượt',
+    desc: 'Phóng xe qua các làng, lạng lách tránh cọc, rơm, trâu qua đường — và húc ngang để đẩy đối thủ đâm vào chướng ngại!',
+    art: (el) => { el.innerHTML = '<canvas class="qc-art" width="300" height="170"></canvas>'; const c = el.firstChild.getContext('2d'); c.scale(300 / 960, 170 / 540); raceArt(c); },
+  },
+  {
+    id: 'quyen', url: 'quyen.html', name: 'Quyền Cước 97', color: 'var(--coral)', soft: 'var(--coral-soft)', isNew: true,
+    tag: 'Đối kháng · Hành động', players: '2 đấu + 8 xem', time: '2–5 phút/trận',
+    desc: 'Game đánh nhau kiểu thùng game ngày xưa: 12 võ sĩ, đánh liên hoàn, chạy lướt, tuyệt chiêu, đồ hoạ pixel. Thắng ở lại, thua xuống xếp hàng!',
+    art: (el) => { el.innerHTML = '<canvas class="qc-art" width="300" height="170"></canvas>'; const cv = el.firstChild, c = cv.getContext('2d'); c.scale(300 / 960, 170 / 540); c.translate(0, 0); fightArt(c); },
+  },
+  {
+    id: 'motla', url: 'motla.html', name: 'Một Lá!', color: 'var(--coral)', soft: 'var(--coral-soft)', isNew: true,
+    tag: 'Bài màu · Siêu nhanh', players: '2–10 người', time: '5–15 phút',
+    desc: 'Đánh lá cùng màu hoặc cùng số, chặn +2 +4 cộng dồn, đảo chiều, đổi màu. Còn 1 lá nhớ hô "Một lá!" kẻo bị bắt phạt!',
+    art: (el) => { el.innerHTML = `<div class="ml-demo">${['r7', 'yv', 'w', 'gd', 'f'].map((c, i) => motlaCard(c, 'd' + i)).join('')}</div>`; },
+  },
+  {
+    id: 'cangua', url: 'cangua.html', name: 'Cờ Cá Ngựa', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,
+    tag: 'Xúc xắc · Đá ngựa', players: '2–4 chơi + xem', time: '15–30 phút',
+    desc: 'Đổ 6 xuất quân, đi trúng là đá ngựa đối thủ về chuồng, đưa đủ 4 ngựa về đích trước để thắng. Luật Việt quen thuộc.',
+    art: (el) => { el.innerHTML = `<div class="lg-demo">${ludoDie(6, '')}<span class="lg-dh" style="--hc:#ff4d5e">🐴</span><span class="lg-dh" style="--hc:#3b82f6">🐴</span><span class="lg-dh" style="--hc:#2fbf71">🐴</span><span class="lg-dh" style="--hc:#ffc43d">🐴</span></div>`; },
+  },
+  {
+    id: 'typhu', url: 'typhu.html', name: 'Cờ Tỷ Phú', color: 'var(--orange)', soft: 'var(--orange-soft)', isNew: true,
+    tag: 'Kinh doanh · Đổi chác', players: '2–6 chơi + xem', time: '20–90 phút',
+    desc: 'Đi một vòng Việt Nam: mua đất Hà Giang tới Thủ Thiêm, gom bộ màu, xây nhà, khách sạn, thu tiền thuê, đổi chác — làm đối thủ phá sản!',
+    art: (el) => { el.innerHTML = '<div class="tp-demo"><span style="--gc:#ff6fb5">Huế</span><span style="--gc:#3ecf6e">Hồ Tây</span><span style="--gc:#3b5bdb">Quận 1</span><b>🏠🏨</b></div>'; },
   },
   {
     id: 'bay', url: 'bay.html', name: 'Vỗ Cánh Sinh Tồn', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,

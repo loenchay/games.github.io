@@ -77,10 +77,12 @@ function drawGround(c, d) {
   for (let x = -((d % 30) + 30); x < W + 30; x += 30) { c.beginPath(); c.moveTo(x, GROUND + 16); c.lineTo(x + 15, GROUND + 16); c.lineTo(x + 5, H); c.lineTo(x - 10, H); c.fill(); }
   c.strokeStyle = EDGE; c.lineWidth = 3; c.beginPath(); c.moveTo(0, GROUND); c.lineTo(W, GROUND); c.stroke();
 }
-function drawBird(c, x, y, vy, p, { ghost = false, label = '', dead = false, t = 0 } = {}) {
+function drawBird(c, x, y, vy, p, { ghost = false, dim = false, label = '', dead = false, t = 0 } = {}) {
   c.save();
-  c.globalAlpha = ghost ? 0.55 : 1;
+  // chim người khác mờ hơn (và nhỏ hơn chút) khi mình đang bay, để mắt tập trung vào chim của mình
+  c.globalAlpha = ghost ? (dim ? 0.28 : 0.6) : 1;
   c.translate(x, y);
+  if (ghost && dim) c.scale(0.86, 0.86);
   const ang = dead ? Math.PI / 2 : Math.max(-0.45, Math.min(1.2, vy / 600));
   c.rotate(ang);
   const col = AV_COLORS[p?.av?.c ?? 0] || '#ffc93d';
@@ -102,7 +104,7 @@ function drawBird(c, x, y, vy, p, { ghost = false, label = '', dead = false, t =
   c.restore();
   if (label) {
     c.save();
-    c.globalAlpha = ghost ? 0.85 : 1;
+    c.globalAlpha = ghost ? (dim ? 0.4 : 0.85) : 1;
     c.font = '700 11px "Be Vietnam Pro",sans-serif';
     const w = c.measureText(label).width + 12;
     c.fillStyle = ghost ? 'rgba(255,255,255,.85)' : '#ffc93d';
@@ -384,6 +386,7 @@ function frame(now) {
   if (b && racing && T <= 0) app.lastScore = 0;
   // chim của người khác
   if (racing || pub.phase === 'over') {
+    const dim = racing && !!b && b.alive && pub.racers.includes(app.cid);
     for (const cid of pub.racers) {
       if (cid === app.cid) continue;
       const g = app.ghosts.get(cid), p = P(cid);
@@ -396,7 +399,7 @@ function frame(now) {
         if (!g.a) alive = false;
         y = Math.max(R, Math.min(GROUND - R, y));
       }
-      drawBird(c, BX, y, vy, p, { ghost: true, label: p.name, dead: !alive, t: tsec + cid.length });
+      drawBird(c, BX, y, vy, p, { ghost: true, dim, label: p.name, dead: !alive, t: tsec + cid.length });
     }
   } else {
     // phòng chờ: mọi người xếp hàng lơ lửng

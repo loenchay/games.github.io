@@ -1,0 +1,95 @@
+// Bàn "Cờ Tỷ Phú" — 40 ô với các địa danh Việt Nam.
+// type: go | prop | rail | util | chance | chest | tax | jail | park | gojail
+// prop: g = nhóm màu, price, house = giá xây 1 nhà, rent = [đất trống, 1 nhà, 2, 3, 4, khách sạn]
+
+export const GROUPS = {
+  brown: { color: '#9a6b4f', name: 'Nâu' },
+  sky: { color: '#7fd0ff', name: 'Xanh nhạt' },
+  pink: { color: '#ff6fb5', name: 'Hồng' },
+  orange: { color: '#ff9f43', name: 'Cam' },
+  red: { color: '#ff4d4d', name: 'Đỏ' },
+  yellow: { color: '#ffd43b', name: 'Vàng' },
+  green: { color: '#3ecf6e', name: 'Xanh lá' },
+  navy: { color: '#3b5bdb', name: 'Xanh đậm' },
+};
+
+const P = (name, short, g, price, house, rent) => ({ type: 'prop', name, short, g, price, house, rent });
+export const BOARD = [
+  { type: 'go', name: 'Xuất phát', short: 'Xuất phát' },
+  P('Hà Giang', 'Hà Giang', 'brown', 60, 50, [2, 10, 30, 90, 160, 250]),
+  { type: 'chest', name: 'Khí vận', short: 'Khí vận' },
+  P('Cao Bằng', 'Cao Bằng', 'brown', 60, 50, [4, 20, 60, 180, 320, 450]),
+  { type: 'tax', name: 'Thuế thu nhập', short: 'Thuế', amount: 200 },
+  { type: 'rail', name: 'Ga Hà Nội', short: 'Ga HN', price: 200 },
+  P('Hạ Long', 'Hạ Long', 'sky', 100, 50, [6, 30, 90, 270, 400, 550]),
+  { type: 'chance', name: 'Cơ hội', short: 'Cơ hội' },
+  P('Sa Pa', 'Sa Pa', 'sky', 100, 50, [6, 30, 90, 270, 400, 550]),
+  P('Ninh Bình', 'Ninh Bình', 'sky', 120, 50, [8, 40, 100, 300, 450, 600]),
+  { type: 'jail', name: 'Nhà tù', short: 'Nhà tù' },
+  P('Huế', 'Huế', 'pink', 140, 100, [10, 50, 150, 450, 625, 750]),
+  { type: 'util', name: 'Công ty Điện lực', short: 'Điện lực', price: 150 },
+  P('Hội An', 'Hội An', 'pink', 140, 100, [10, 50, 150, 450, 625, 750]),
+  P('Đà Nẵng', 'Đà Nẵng', 'pink', 160, 100, [12, 60, 180, 500, 700, 900]),
+  { type: 'rail', name: 'Ga Huế', short: 'Ga Huế', price: 200 },
+  P('Quy Nhơn', 'Quy Nhơn', 'orange', 180, 100, [14, 70, 200, 550, 750, 950]),
+  { type: 'chest', name: 'Khí vận', short: 'Khí vận' },
+  P('Nha Trang', 'Nha Trang', 'orange', 180, 100, [14, 70, 200, 550, 750, 950]),
+  P('Đà Lạt', 'Đà Lạt', 'orange', 200, 100, [16, 80, 220, 600, 800, 1000]),
+  { type: 'park', name: 'Bãi đỗ xe', short: 'Đỗ xe' },
+  P('Cần Thơ', 'Cần Thơ', 'red', 220, 150, [18, 90, 250, 700, 875, 1050]),
+  { type: 'chance', name: 'Cơ hội', short: 'Cơ hội' },
+  P('Vũng Tàu', 'Vũng Tàu', 'red', 220, 150, [18, 90, 250, 700, 875, 1050]),
+  P('Phú Quốc', 'Phú Quốc', 'red', 240, 150, [20, 100, 300, 750, 925, 1100]),
+  { type: 'rail', name: 'Ga Sài Gòn', short: 'Ga SG', price: 200 },
+  P('Hải Phòng', 'Hải Phòng', 'yellow', 260, 150, [22, 110, 330, 800, 975, 1150]),
+  P('Bình Dương', 'Bình Dương', 'yellow', 260, 150, [22, 110, 330, 800, 975, 1150]),
+  { type: 'util', name: 'Công ty Cấp nước', short: 'Cấp nước', price: 150 },
+  P('Đồng Nai', 'Đồng Nai', 'yellow', 280, 150, [24, 120, 360, 850, 1025, 1200]),
+  { type: 'gojail', name: 'Vào tù', short: 'Vào tù' },
+  P('Hồ Tây', 'Hồ Tây', 'green', 300, 200, [26, 130, 390, 900, 1100, 1275]),
+  P('Phố Cổ', 'Phố Cổ', 'green', 300, 200, [26, 130, 390, 900, 1100, 1275]),
+  { type: 'chest', name: 'Khí vận', short: 'Khí vận' },
+  P('Ba Đình', 'Ba Đình', 'green', 320, 200, [28, 150, 450, 1000, 1200, 1400]),
+  { type: 'rail', name: 'Sân bay Nội Bài', short: 'Nội Bài', price: 200 },
+  { type: 'chance', name: 'Cơ hội', short: 'Cơ hội' },
+  P('Quận 1', 'Quận 1', 'navy', 350, 200, [35, 175, 500, 1100, 1300, 1500]),
+  { type: 'tax', name: 'Thuế xa xỉ', short: 'Thuế', amount: 100 },
+  P('Thủ Thiêm', 'Thủ Thiêm', 'navy', 400, 200, [50, 200, 600, 1400, 1700, 2000]),
+];
+export const JAIL = 10;
+export const BUYABLE = (i) => ['prop', 'rail', 'util'].includes(BOARD[i].type);
+
+// Thẻ: k = loại hiệu ứng
+export const CHANCE = [
+  { text: 'Đi thẳng tới Xuất phát, nhận 200.', k: 'goto', to: 0 },
+  { text: 'Bay vào Thủ Thiêm ngắm cầu Ba Son.', k: 'goto', to: 39 },
+  { text: 'Đi du lịch Phú Quốc. Qua Xuất phát thì nhận 200.', k: 'goto', to: 24 },
+  { text: 'Ghé thăm Huế. Qua Xuất phát thì nhận 200.', k: 'goto', to: 11 },
+  { text: 'Lên tàu ở ga gần nhất. Nếu có chủ, trả gấp đôi tiền vé.', k: 'rail2' },
+  { text: 'Tới công ty điện/nước gần nhất. Nếu có chủ, trả 10 lần số xúc xắc.', k: 'util10' },
+  { text: 'Ngân hàng trả cổ tức cho bạn 50.', k: 'money', n: 50 },
+  { text: 'Thẻ ra tù miễn phí. Giữ lại dùng sau.', k: 'free' },
+  { text: 'Lạc đường, lùi lại 3 ô.', k: 'back', n: 3 },
+  { text: 'Vượt đèn đỏ — vào tù!', k: 'jail' },
+  { text: 'Sửa sang nhà cửa: trả 25 mỗi nhà, 100 mỗi khách sạn.', k: 'repair', h: 25, H: 100 },
+  { text: 'Phạt chạy quá tốc độ 15.', k: 'money', n: -15 },
+  { text: 'Được bầu làm trưởng nhóm du lịch: trả mỗi người 50.', k: 'each', n: -50 },
+  { text: 'Khoản vay xây nhà đáo hạn: nhận 150.', k: 'money', n: 150 },
+];
+export const CHEST = [
+  { text: 'Đi thẳng tới Xuất phát, nhận 200.', k: 'goto', to: 0 },
+  { text: 'Ngân hàng tính nhầm có lợi cho bạn: nhận 200.', k: 'money', n: 200 },
+  { text: 'Phí khám bệnh 50.', k: 'money', n: -50 },
+  { text: 'Bán cổ phiếu được 50.', k: 'money', n: 50 },
+  { text: 'Thẻ ra tù miễn phí. Giữ lại dùng sau.', k: 'free' },
+  { text: 'Bị bắt vì nói quá to trong rạp phim — vào tù!', k: 'jail' },
+  { text: 'Quỹ du lịch đáo hạn: nhận 100.', k: 'money', n: 100 },
+  { text: 'Hoàn thuế thu nhập: nhận 20.', k: 'money', n: 20 },
+  { text: 'Hôm nay sinh nhật bạn: mỗi người tặng bạn 10.', k: 'each', n: 10 },
+  { text: 'Bảo hiểm nhân thọ đáo hạn: nhận 100.', k: 'money', n: 100 },
+  { text: 'Học phí 50.', k: 'money', n: -50 },
+  { text: 'Thu nhập tư vấn: nhận 25.', k: 'money', n: 25 },
+  { text: 'Sửa đường trước nhà: trả 40 mỗi nhà, 115 mỗi khách sạn.', k: 'repair', h: 40, H: 115 },
+  { text: 'Thắng giải nhì cuộc thi hoa hậu thân thiện: nhận 10.', k: 'money', n: 10 },
+  { text: 'Được thừa kế 100.', k: 'money', n: 100 },
+];

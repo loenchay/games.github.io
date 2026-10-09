@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Cờ Cá Ngựa</title>
+  <meta name="description" content="Cờ cá ngựa online 2–4 người: đổ xúc xắc, xuất quân, đá ngựa, về chuồng." />
+  <meta name="theme-color" content="#7c4dff" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet" />
+  <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dienta caro tb cangua">
+  <!-- ======= TRANG CHỦ GAME ======= -->
+  <main id="home" class="screen">
+    <nav class="home-nav">
+      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-sq" data-logo></span>Sân Chơi Hội Bạn</a>
+      <div class="nav-right"><button class="theme-btn" type="button" data-theme-toggle></button><a href="index.html" class="btn sm">← Tất cả game</a></div>
+    </nav>
+
+    <section class="home-grid dt-home">
+      <div class="card look-card caro-hero">
+        <span class="chip hero-badge" style="background:var(--lime);color:#1d1648">🐴 2–4 người chơi · còn lại xem</span>
+        <h1 class="home-title" style="font-size:clamp(38px,5.4vw,58px)">Cờ <span class="hl" style="background:var(--lime)">Cá Ngựa</span></h1>
+        <p class="home-lead" style="margin-bottom:12px">Cờ cá ngựa luật Việt: đổ 6 mới được xuất quân, đổ 6 được đổ tiếp, đi trúng ngựa đối thủ thì đá về chuồng. Ai đưa đủ 4 ngựa về đích trước thắng!</p>
+        <div class="tb-demo" id="tbDemo"></div>
+        <div class="nh-how">
+          <div><b>1</b> Tạo phòng, gửi link</div><div><b>2</b> Chọn màu ngựa, Sẵn sàng</div><div><b>3</b> Đổ xúc xắc, chọn ngựa đi</div><div><b>4</b> Về đích đủ 4 ngựa là thắng</div>
+        </div>
+      </div>
+
+      <form id="homeForm" class="card join-card" autocomplete="off">
+        <h2>Vào phòng chơi</h2>
+        <label class="field" data-identity>
+          <span>Tên hiển thị</span>
+          <input id="nameInput" maxlength="18" placeholder="VD: Kỳ Thủ" required />
+        </label>
+        <div id="avPick" data-identity></div>
+        <div class="seg" role="tablist">
+          <button type="button" class="seg-btn active" data-mode="create">Tạo phòng</button>
+          <button type="button" class="seg-btn" data-mode="join">Vào phòng</button>
+        </div>
+        <label class="field join-only">
+          <span>Mã phòng</span>
+          <input id="codeInput" maxlength="6" placeholder="ABC123" class="code-input" />
+        </label>
+        <button class="btn primary big" id="homeSubmit" type="submit">Tạo phòng mới →</button>
+      </form>
+    </section>
+  </main>
+
+<!-- ======= PHÒNG ======= -->
+  <div id="room" class="screen hidden">
+    <header class="topbar">
+      <button class="brand" id="leaveBtn" title="Rời phòng"><span class="logo-sq" data-logo></span><span class="brand-txt">Cá Ngựa</span></button>
+      <button class="chip code-chip" id="codeChip" title="Sao chép link mời"></button>
+      <div class="phase-pill" id="phasePill"></div>
+      <div class="voice-ctl">
+        <button class="theme-btn icon-btn" type="button" data-theme-toggle></button>
+        <button class="icon-btn" id="micBtn" title="Bật mic"></button>
+        <button class="icon-btn" id="deafBtn" title="Tắt tiếng"></button>
+      </div>
+      <div class="timebar"><i id="timebar"></i></div>
+    </header>
+    <div id="hostLost" class="banner hidden">Mất kết nối với chủ phòng. Đang chờ chủ phòng quay lại...</div>
+
+    <div class="room-body" data-tab="stage">
+      <section id="stage" class="stage"></section>
+      <aside id="side" class="side">
+        <div class="panel score-box" id="scoreBox"></div>
+        <div class="chat panel">
+          <div class="chat-list" id="chatList"></div>
+          <form id="chatForm" class="chat-form" autocomplete="off">
+            <input id="chatInput" maxlength="300" placeholder="Nhắn cho mọi người..." />
+            <button class="btn primary" type="submit">Gửi</button>
+          </form>
+        </div>
+      </aside>
+    </div>
+
+    <nav class="mobile-tabs">
+      <button data-tab="stage" class="active"><span class="mt-ic" data-ic="users"></span>Sân khấu</button>
+      <button data-tab="side"><span class="mt-ic" data-ic="chat"></span>Điểm & Chat<b id="chatBadge" class="badge hidden"></b></button>
+    </nav>
+  </div>
+
+  <div id="overlay" class="overlay hidden"></div>
+  <div id="toasts"></div>
+  <div id="audio-sink" hidden></div>
+
+    <script src="site-config.js"></script>
+  <script defer src="assets/cangua.js"></script>
+</body>
+</html>

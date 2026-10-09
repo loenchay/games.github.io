@@ -109,12 +109,45 @@ Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản 
 - Luật chủ phòng chỉnh được: bàn 15×15 / 19×19, giới hạn thời gian mỗi nước (hết giờ thua), **chặn 2 đầu**, ván sau ai đi trước (người thua / luân phiên / giữ nguyên).
 - Ghế trống thì người xem bấm **Ngồi ghế** để vào chơi; người chơi có thể **Rời ghế** xuống xem, hoặc **Đổi X/O**.
 
+## Cờ Tướng & Cờ Vua
+
+- Giống Cờ Caro: phòng tối đa **10 người**, 2 người cầm quân (Cờ Tướng: **Đỏ** đi trước / **Đen**; Cờ Vua: **Trắng** / **Đen**), còn lại xem, chat, voice, thả cảm xúc. Người cầm quân Đen thấy bàn cờ quay về phía mình; người xem bấm **⇅ Lật bàn**.
+- Bấm quân → hiện các ô đi được → bấm ô đích. Có **đồng hồ mỗi bên** (3/5/10/15/30 phút hoặc không giới hạn, cộng thêm +2/+5/+10s mỗi nước), **biên bản nước đi**, quân đã ăn, xin đi lại (tối đa 3), xin hoà, đầu hàng.
+- **Cờ Vua:** luật quốc tế đầy đủ — nhập thành, bắt tốt qua đường, phong cấp (chọn Hậu/Xe/Tượng/Mã), chiếu hết, hoà do pat / lặp 3 lần / 50 nước / thiếu quân. Biên bản theo ký hiệu quốc tế (e4, Nf3, O-O, Qxf7#).
+- **Cờ Tướng:** Tướng/Sĩ trong cung, Tượng không qua sông và bị cản mắt, Mã cản chân, Pháo cần ngòi, Tốt qua sông đi ngang, hai Tướng không được đối mặt. Hết nước đi là thua. Hoà khi lặp 3 lần hoặc 60 nước không ăn quân. Biên bản kiểu Việt (P2-5, M8.7, X1/2). Nút **Chữ Việt / Chữ Hán** đổi cách hiện quân.
+- Code dùng chung ở `src/duel/` (luật `chess.js`, `xiangqi.js` có kiểm thử perft; `engine.js` phòng; `room.js` giao diện; `boards.js` vẽ bàn SVG).
+
+## Một Lá! · Cờ Cá Ngựa · Cờ Tỷ Phú (bàn chơi nhiều người)
+
+- Dùng chung khung phòng `src/table/`: tối đa **10 người** trong phòng; ai ngồi ghế thì chơi, còn lại xem/chat/voice/thả cảm xúc. Người chơi bấm **Sẵn sàng**, chủ phòng bấm **Bắt đầu**. Có giờ mỗi lượt (15/30/60s hoặc tắt) — hết giờ hoặc mất mạng thì máy tự đi thay. Chủ phòng có nút **Kết thúc ván**.
+- Mỗi người nhận trạng thái riêng từ chủ phòng nên **bài trên tay được giấu** với người khác (máy chủ phòng vẫn giữ toàn bộ, chơi với bạn bè tin tưởng nhau).
+- **Một Lá!** (2–10 người, kiểu bài màu): đánh cùng màu/cùng số, ⊘ mất lượt, ⇄ đảo chiều, +2, đổi màu, +4. Tuỳ chọn: chia 5/7/10 lá, cộng dồn +2/+4, bốc 1 lá hay bốc tới khi đánh được. Còn 2 lá bấm **📣 Một lá!**, quên thì người khác bấm **🫵 Bắt!** → bốc phạt 2. Hết bài trước thắng, cộng điểm bài còn lại của mọi người.
+- **Cờ Cá Ngựa** (2–4 người): luật Việt — đổ 6 (tuỳ chọn 1 hoặc 6) mới xuất quân, đổ 6 đổ thêm, đi trúng ngựa đối thủ là đá về chuồng, tuỳ chọn cấm nhảy qua đầu ngựa khác, lên 5 bậc rồi vào đích phải đổ vừa đủ. Ngựa trượt từng ô, có gợi ý ô đến.
+- **Cờ Tỷ Phú** (2–6 người): 40 ô địa danh Việt Nam (Hà Giang → Thủ Thiêm), 4 nhà ga/sân bay, điện lực, cấp nước, Cơ hội & Khí vận. Mua đất, đủ bộ màu thuê ×2 và xây nhà đều → khách sạn, cầm cố/chuộc, đổi chác đất + tiền, tù (đổ đôi / nộp $50 / thẻ), phá sản. Giới hạn thời gian 20–90 phút (hết giờ ai giàu nhất thắng) hoặc chơi tới khi phá sản hết. Bấm vào ô để xem bảng giá thuê. Chưa có đấu giá khi bỏ qua không mua.
+
+## Quyền Cước 97 (đối kháng 2 người)
+
+- Game đánh nhau 2D kiểu thùng game thập niên 90, **12 võ sĩ tự thiết kế**: Tèo, Mai, Bác Sấm, Lão Hạc, Tư Xích Lô, Cô Ba Bánh Mì, Kiệt Ninja, RX-97 Robot, Bé Na, Thầy Bảy (võ Bình Định), Hùng Tạ, Lan Xiếc. Mỗi người 3 chiêu + 1 tuyệt chiêu **riêng, không ai trùng ai** (48 cơ chế khác nhau: phản đòn, gồng chịu đòn, nón lá bay vòng về, hất tung để đánh tiếp trên không, laser, nam châm hút, lăn né chưởng, quăng tạ lăn sát đất, lốc xoáy hút, đoàn xích lô, mưa bánh mì, tên lửa tự đuổi...). Xem mô tả từng chiêu ở màn chọn võ sĩ.
+- Lối đánh nhanh: đòn nhẹ **nối liên hoàn** (nhẹ → nhẹ → mạnh → chiêu), huỷ đòn thường vào chiêu, huỷ chiêu vào tuyệt chiêu, **bấm đúp → để chạy, ← ← để lùi nhanh** (né đòn), chạm nhẹ ↑ để nhảy thấp, bộ đệm phím 6 khung (bấm sớm vẫn ra đòn).
+- Hình ảnh kiểu arcade: đồ hoạ **pixel** (bật/tắt), hiệu ứng **màn hình CRT**, máy quay phóng to bám theo 2 võ sĩ, màn **VS** trước trận, cắt cảnh khi tung tuyệt chiêu, thanh máu xiên có mặt nhân vật, đếm combo, câu thoại khi thắng. 3 sàn đấu: Phố Cổ Về Đêm, Chợ Nổi Cái Răng, Đỉnh Núi Mây.
+- Phòng 10 người: **2 võ sĩ** đấu, còn lại xem (thấy trận y hệt), chat, voice, thả cảm xúc. Người xem bấm **Xếp hàng lên đấu**; tuỳ chọn "thắng ở lại, thua xuống xếp hàng". Luật: thắng 1/2/3 hiệp, 60/99 giây hoặc không giới hạn, chọn sàn đấu.
+- Phím: `A D` / `← →` đi, `W` nhảy, `S` ngồi, giữ lùi để đỡ. `J` đấm nhẹ, `U` đấm mạnh, `K` đá nhẹ, `I` đá mạnh. Lệnh chiêu kiểu cổ điển (↓↘→ + Đấm…) hoặc phím tắt `1 2 3`, `Space` = tuyệt chiêu. Áp sát + → + `U` = quật ngã. Điện thoại có cần điều khiển + nút cảm ứng; tay cầm (gamepad) cũng chơi được.
+- Mạng: mỗi máy võ sĩ tự mô phỏng (tất định, số nguyên) và gửi phím bấm cho nhau; tín hiệu đối thủ tới trễ thì máy **đoán trước rồi tua lại** (rollback) nên vẫn mượt. Người xem vào giữa trận nhận ảnh chụp trận đấu rồi chạy tiếp.
+- Có nút **Tập với máy**. Code ở `src/fight/` (sim.js luật & va chạm, netplay.js đồng bộ, render.js vẽ, chars.js nhân vật, cpu.js máy đánh).
+
+## Đua Xe Đường Làng (2 người đua)
+
+- Góc nhìn sau lưng xe, lao thẳng về phía trước (giả 3D kiểu thùng game), đường chạy qua các làng (Đông Hồ, Bát Tràng, Vạn Phúc...). 6 loại xe: Cúp 50, Vespa Cổ, Dream Lùn, Xe Lam, Xe Đạp Điện, Công Nông — khác nhau về tốc độ, tăng tốc, lạng lách, sức húc.
+- Xe tự chạy; `A/D` hoặc `←/→` bẻ lái, giữ `W/↑` chạy hết ga, `S/↓` phanh, `J` **húc ngang** (đẩy đối thủ văng sang bên — vào chướng ngại là nó thua), `K`/`Space` nitro khi đầy. Điện thoại có cần lái + nút Ga/Húc/Nitro (kéo cần xuống để phanh).
+- Chướng ngại: cọc, đống rơm, xe ba gác, trâu đi qua đi lại, đá (đâm = thua hiệp), vũng dầu (xoay xe), bùn (chậm), mũi tên vàng (tăng tốc). Bị đối thủ bỏ xa hơn 160 m cũng bị loại. Người bị loại trước thì dừng; người còn lại chưa thắng ngay mà chạy tiếp một mình tới khi cũng đâm (máy quay chuyển sang theo xe đó) — ai trụ lâu hơn hoặc về đích trước thắng hiệp. Đường có đích (1,2 / 2,4 km) hoặc không có đích (ai trụ lâu hơn).
+- Phòng 10 người: 2 tay đua, còn lại xem và xếp hàng; thắng ở lại, thua xuống. Dùng chung cơ chế mạng rollback với Quyền Cước. Code ở `src/race/`.
+
 ## Vỗ Cánh Sinh Tồn
 
 - Tối đa **16 người** cùng bay trên một bầu trời. Chủ phòng bấm **Cất cánh** → đếm ngược 3 giây → bay. Chạm màn hình hoặc bấm **Space / ↑ / W** để vỗ cánh.
 - Đụng cột hoặc rơi xuống đất là thua. **Chú chim trụ lại cuối cùng thắng** (nếu cùng rơi thì ai rơi sau thắng). Bay 1 mình = chế độ tập.
 - Càng bay càng nhanh, khe càng hẹp, nên ván nào cũng có hồi kết. 3 độ khó: Thong thả / Vừa / Khó.
-- Mọi máy dùng chung một "hạt giống" nên thấy y hệt các cột; mỗi người tự điều khiển chim của mình và gửi vị trí cho mọi người xem (chim người khác hiện mờ kèm tên).
+- Mọi máy dùng chung một "hạt giống" nên thấy y hệt các cột; mỗi người tự điều khiển chim của mình và gửi vị trí cho mọi người xem (chim người khác hiện mờ kèm tên — khi mình đang bay thì càng mờ và nhỏ hơn để dễ tập trung vào chim của mình).
 - Ai ẩn tab / mất mạng quá 4 giây khi đang bay sẽ bị coi là rơi, để ván không bị treo.
 
 ## Hồ sơ chung + số người online
@@ -164,6 +197,10 @@ src/                                   mã nguồn
   nhai/engine.js  score.js (chấm điểm)  audio.js (phát/thu)  main.js   Nhại Như Thật
   caro/engine.js  main.js   Cờ Caro
   bay/world.js (vật lý, cột)  engine.js  main.js   Vỗ Cánh Sinh Tồn
+  duel/chess.js xiangqi.js engine.js room.js boards.js   Cờ Vua + Cờ Tướng (dùng chung)
+  covua/main.js  cotuong/main.js   điểm vào của 2 game cờ
+  table/engine.js room.js   khung phòng nhiều người (ghế, lượt, giờ, giấu bài)
+  motla/  cangua/  typhu/   logic.js (luật) + view.js (giao diện) + main.js
   site.js          Hồ sơ chung + đếm online
 build.sh                               đóng gói src/ → assets/
 ```
