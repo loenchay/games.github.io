@@ -26,12 +26,25 @@ echo ""
 if [ "$FORCE" = "1" ]; then
   git -c credential.helper= push -f -u origin main
 else
-  git -c credential.helper= push -u origin main || {
+  LOG=$(mktemp)
+  if ! git -c credential.helper= push -u origin main 2>&1 | tee "$LOG"; then :; fi
+  if grep -qE "403|denied|Authentication failed|401" "$LOG"; then
+    rm -f "$LOG"
+    echo ""
+    echo "Token không có quyền ghi vào repo. Tạo lại token (Fine-grained):"
+    echo "  - Resource owner: loenchay"
+    echo "  - Repository access: Only select repositories -> games.github.io"
+    echo "  - Repository permissions -> Contents: Read and write"
+    exit 1
+  fi
+  if grep -qE "rejected|fetch first|non-fast-forward" "$LOG"; then
+    rm -f "$LOG"
     echo ""
     echo "Push bị từ chối: repo trên GitHub đã có sẵn nội dung khác (VD: README tạo lúc tạo repo)."
     echo "Nếu muốn ghi đè bằng bản trên máy, chạy:  FORCE=1 sh deploy-github.sh"
     exit 1
-  }
+  fi
+  rm -f "$LOG"
 fi
 echo ""
 echo "Xong! Vài phút sau mở: https://loenchay.github.io/games.github.io/"
