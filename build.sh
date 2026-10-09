@@ -8,4 +8,6 @@ npx esbuild src/masoi.js --bundle --format=iife --target=es2020 --legal-comments
 npx esbuild src/dienta/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/dienta.js
 npx esbuild src/nhanvat.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/nhanvat.js
 npx esbuild src/nhai/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/nhai.js
+npx esbuild src/caro/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/caro.js
+npx esbuild src/bay/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/bay.js
 echo "Xong! Đã cập nhật assets/"

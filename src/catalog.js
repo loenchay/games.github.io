@@ -24,6 +24,18 @@ const GAMES = [
     desc: 'Nghe tiếng gà gáy, còi xe, câu "Ối dồi ôi"... rồi cả phòng cùng nhại lại. Máy chấm độ giống + mọi người bỏ phiếu.',
     art: (el) => { const p = createPuppet(el); p.setLook({ skin: 'chotdon' }); p.setPose({ body: 'stand', head: 'center', face: 'happy', armL: 'down', armR: 'mouth', propR: 'mic', legL: 'down', legR: 'down' }); let ph = 0; setInterval(() => { ph += 0.2; p.setTalk?.(Math.max(0, Math.sin(ph * 3) * 0.6 + Math.sin(ph * 7.1) * 0.3)); }, 70); },
   },
+  {
+    id: 'caro', url: 'caro.html', name: 'Cờ Caro', color: 'var(--coral)', soft: 'var(--coral-soft)', isNew: true,
+    tag: 'Đối kháng · Trí tuệ', players: '2 chơi + 8 xem', time: '5–15 phút',
+    desc: 'Xếp đủ 5 quân liên tiếp để thắng. 2 người ngồi ghế đấu nhau, tối đa 8 người vào xem, chat và cổ vũ.',
+    art: (el) => { el.innerHTML = '<div class="caro-art">' + Array.from({ length: 25 }, (_, i) => { const m = { 6: 'X', 7: 'O', 12: 'X', 13: 'O', 18: 'X', 8: 'O', 24: 'X', 0: 'X' }[i]; return `<i class="${m || ''}">${m === 'X' ? '✕' : m === 'O' ? '○' : ''}</i>`; }).join('') + '</div>'; },
+  },
+  {
+    id: 'bay', url: 'bay.html', name: 'Vỗ Cánh Sinh Tồn', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,
+    tag: 'Phản xạ · Sinh tồn', players: '1–16 người', time: '1–3 phút/ván',
+    desc: 'Cả phòng cùng vỗ cánh luồn qua các cột kẹo trên một bầu trời. Đụng là rơi — chú chim trụ lại cuối cùng thắng!',
+    art: (el) => { el.innerHTML = '<div class="bay-art"><span class="p1"></span><span class="p2"></span><b style="left:28%;top:40%">🐥</b><b style="left:40%;top:56%;opacity:.6">🦊</b><b style="left:18%;top:62%;opacity:.6">🐸</b></div>'; },
+  },
 ];
 
 const prof = loadProfile();

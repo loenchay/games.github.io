@@ -1051,3 +1051,101 @@ canvas.pp3d { display: block; width: 100% !important; height: 100% !important; m
   .home-nav .nav-right { flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-left: auto; }
   .home-nav .nav-right .btn.sm { padding: 5px 9px; font-size: 12px; }
 }
+
+/* ===== Cờ Caro ===== */
+.caro-demo { max-width: 300px; margin: 6px 0 4px; }
+.cboard { --n: 15; --line: color-mix(in srgb, var(--edge) 22%, transparent); display: grid; grid-template-columns: repeat(var(--n), 1fr); aspect-ratio: 1; width: 100%; background: #f7e3b5; border: 2.5px solid var(--edge); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+:root[data-theme='dark'] .cboard { background: #3a2f52; --line: rgba(255, 255, 255, .14); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .cboard { background: #3a2f52; --line: rgba(255, 255, 255, .14); } }
+.cboard > i { position: relative; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; place-items: center; min-width: 0; min-height: 0; }
+.cboard > i svg { width: 82%; height: 82%; overflow: visible; }
+.cboard > i.X svg path, .sym.X svg path { stroke: #ff3d4f; stroke-width: 1.9; stroke-linecap: round; fill: none; }
+.cboard > i.O svg circle, .sym.O svg circle { stroke: #2f6bff; stroke-width: 1.7; fill: none; }
+.cboard > i.X svg, .cboard > i.O svg { animation: stonePop .22s ease-out; }
+@keyframes stonePop { from { transform: scale(.3); opacity: 0; } }
+.cboard > i.last { background: color-mix(in srgb, var(--sun) 55%, transparent); }
+.cboard > i.win { background: color-mix(in srgb, var(--lime) 70%, transparent); }
+.cboard > i.win svg { animation: winPulse .8s ease-in-out infinite alternate; }
+@keyframes winPulse { to { transform: scale(1.18); } }
+.cboard.can > i:not(.X):not(.O) { cursor: pointer; }
+.cboard.can.turnX > i:not(.X):not(.O):hover { background: rgba(255, 61, 79, .12); }
+.cboard.can.turnO > i:not(.X):not(.O):hover { background: rgba(47, 107, 255, .12); }
+.caro-wrap { display: grid; gap: 12px; }
+.seats { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 12px; }
+.seat { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 2px solid var(--edge); border-radius: 14px; background: var(--surface); min-width: 0; transition: transform .15s, box-shadow .15s; }
+.seat-O { flex-direction: row-reverse; text-align: right; }
+.seat.turn { box-shadow: 0 0 0 3px var(--sun), var(--shadow-sm); transform: translateY(-2px); }
+.seat.win { background: var(--lime-soft); }
+.seat.offline { opacity: .55; }
+.seat .sym { width: 30px; height: 30px; flex: none; }
+.seat .sym svg { width: 100%; height: 100%; }
+.seat-info { display: grid; min-width: 0; gap: 2px; }
+.seat-info b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seat-info .rec { font-size: 12px; }
+.seat-foot { font-size: 12.5px; }
+.seat-O .seat-foot { justify-self: end; }
+.tag.ok { background: var(--lime-soft); }
+.tag.turn { background: var(--sun); color: #1d1648; }
+.avatar.empty { background: var(--sunken); color: var(--ink-3); }
+.vs { font: 800 20px var(--display); color: var(--ink-3); }
+.board-panel { position: relative; padding: 10px; }
+.board-scroll { max-width: min(100%, 640px); margin: 0 auto; }
+.board-ov { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; transition: opacity .5s; }
+.board-ov.fade { opacity: 0; }
+.over-card { display: grid; justify-items: center; gap: 6px; padding: 16px 26px; background: var(--surface); border: 2.5px solid var(--edge); border-radius: 18px; box-shadow: var(--shadow-lg); font-size: 20px; animation: nhPop2 .4s ease-out; }
+@keyframes nhPop2 { from { transform: scale(.6); opacity: 0; } }
+.reacts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.react-pop { position: absolute; bottom: 10px; font-size: 34px; display: grid; justify-items: center; animation: reactUp 2.6s ease-out forwards; }
+.react-pop small { font-size: 11px; font-weight: 800; background: var(--surface); border: 1.5px solid var(--edge); border-radius: 999px; padding: 0 6px; }
+@keyframes reactUp { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: 1; transform: translateY(-20px) scale(1.1); } 100% { transform: translateY(-260px) scale(1); opacity: 0; } }
+.caro-ctl { padding: 12px 14px; display: grid; gap: 8px; }
+.ctl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ctl-row .msg { flex: 1 1 220px; }
+.ctl-row.small { font-size: 13px; }
+.caro-ctl .ask { flex: 1 1 100%; }
+.btn.danger { background: var(--coral-soft); }
+.react-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px; justify-content: center; }
+.react-bar button { font-size: 22px; background: var(--surface); border: 2px solid var(--edge); border-radius: 12px; width: 44px; height: 40px; cursor: pointer; box-shadow: 0 2px 0 var(--edge); }
+.react-bar button:active { transform: translateY(2px); box-shadow: none; }
+.sym.mini { display: inline-block; width: 18px; height: 18px; vertical-align: middle; }
+.sym.mini svg { width: 100%; height: 100%; }
+.kick-sm { border: 0; background: transparent; color: var(--ink-3); font-size: 16px; cursor: pointer; }
+@media (max-width: 760px) {
+  .seats { grid-template-columns: minmax(0, 1fr); }
+  .vs { display: none; }
+  .seat-O { flex-direction: row; text-align: left; }
+  .seat-O .seat-foot { justify-self: start; }
+  .board-panel { padding: 4px; }
+  .board-scroll { overflow: auto; }
+  .board-scroll .cboard { min-width: calc(var(--n) * 26px); }
+}
+.caro-art { display: grid; grid-template-columns: repeat(5, 1fr); width: 150px; aspect-ratio: 1; background: #f7e3b5; border: 2.5px solid var(--edge); border-radius: 12px; overflow: hidden; transform: rotate(-4deg); box-shadow: var(--shadow-sm); }
+.caro-art i { border-right: 1px solid rgba(29, 22, 72, .2); border-bottom: 1px solid rgba(29, 22, 72, .2); display: grid; place-items: center; font-style: normal; font-weight: 900; font-size: 22px; }
+.caro-art i.X { color: #ff3d4f; } .caro-art i.O { color: #2f6bff; }
+.caro-wrap > *, .caro-wrap .seat, .board-scroll { min-width: 0; }
+.board-scroll { max-width: min(100%, 640px, 72vh); }
+@media (max-width: 760px) {
+  .board-scroll { max-width: 100%; }
+  .board-scroll .cboard { min-width: calc(var(--n) * 21px); }
+}
+
+/* ===== Vỗ Cánh Sinh Tồn ===== */
+.bay-demo { width: 100%; max-width: 420px; aspect-ratio: 4 / 3; height: auto; border: 2.5px solid var(--edge); border-radius: 16px; box-shadow: var(--shadow-sm); margin: 6px 0 4px; display: block; }
+.bay-wrap { display: grid; gap: 12px; }
+.bay-wrap > * { min-width: 0; }
+.bay-stage { padding: 8px; display: grid; place-items: center; }
+.bay-cv { display: block; height: min(74vh, 720px); aspect-ratio: 2 / 3; max-width: 100%; border: 2.5px solid var(--edge); border-radius: 14px; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; background: #7fd0ff; }
+.bay-stage.shake { animation: bayShake .35s; }
+@keyframes bayShake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+.bay-panel { padding: 12px 14px; display: grid; gap: 10px; }
+.bay-status { font-size: 14.5px; }
+.bay-ctl { display: grid; gap: 10px; justify-items: start; }
+.bay-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (max-width: 760px) {
+  .bay-stage { padding: 4px; }
+  .bay-cv { height: auto; width: 100%; max-height: 70vh; }
+}
+.bay-art { position: relative; width: 190px; height: 150px; border: 2.5px solid var(--edge); border-radius: 14px; overflow: hidden; background: linear-gradient(#7fd0ff, #e9f8ff); box-shadow: var(--shadow-sm); transform: rotate(-3deg); }
+.bay-art span { position: absolute; width: 34px; background: #7bd148; border: 2.5px solid var(--edge); border-radius: 6px; }
+.bay-art .p1 { left: 70%; top: -10px; height: 52px; } .bay-art .p2 { left: 70%; bottom: -10px; height: 52px; background: #ff6fb5; }
+.bay-art b { position: absolute; font-size: 26px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #ffc93d; border: 2.5px solid var(--edge); }

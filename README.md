@@ -101,6 +101,22 @@ Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản 
 - Trong lúc nghe / thu / trình diễn, voice chat tự tắt để không lẫn tiếng.
 - Bản thu được nén (12kHz, 8 bit) và gửi thẳng cho người trong phòng, không lưu ở đâu cả.
 
+## Cờ Caro
+
+- Phòng tối đa **10 người**: 2 người ngồi ghế **X** (đi trước) và **O**, những người còn lại là người xem (chat, voice, thả cảm xúc 👏🔥😱 bay trên bàn cờ).
+- Cả 2 bấm **Sẵn sàng** là vào ván. Xếp đủ 5 quân liên tiếp (ngang, dọc, chéo) để thắng.
+- Trong ván: **xin đi lại** (đối thủ phải đồng ý, tối đa 3 lần/ván), **xin hoà**, **đầu hàng**. Rời phòng giữa ván quá 60 giây bị xử thua.
+- Luật chủ phòng chỉnh được: bàn 15×15 / 19×19, giới hạn thời gian mỗi nước (hết giờ thua), **chặn 2 đầu**, ván sau ai đi trước (người thua / luân phiên / giữ nguyên).
+- Ghế trống thì người xem bấm **Ngồi ghế** để vào chơi; người chơi có thể **Rời ghế** xuống xem, hoặc **Đổi X/O**.
+
+## Vỗ Cánh Sinh Tồn
+
+- Tối đa **16 người** cùng bay trên một bầu trời. Chủ phòng bấm **Cất cánh** → đếm ngược 3 giây → bay. Chạm màn hình hoặc bấm **Space / ↑ / W** để vỗ cánh.
+- Đụng cột hoặc rơi xuống đất là thua. **Chú chim trụ lại cuối cùng thắng** (nếu cùng rơi thì ai rơi sau thắng). Bay 1 mình = chế độ tập.
+- Càng bay càng nhanh, khe càng hẹp, nên ván nào cũng có hồi kết. 3 độ khó: Thong thả / Vừa / Khó.
+- Mọi máy dùng chung một "hạt giống" nên thấy y hệt các cột; mỗi người tự điều khiển chim của mình và gửi vị trí cho mọi người xem (chim người khác hiện mờ kèm tên).
+- Ai ẩn tab / mất mạng quá 4 giây khi đang bay sẽ bị coi là rơi, để ván không bị treo.
+
 ## Hồ sơ chung + số người online
 
 - Lần đầu mở trang (bất kỳ trang nào), web hỏi tên + avatar một lần. Vào game nào cũng dùng luôn; đổi ở chip tên góc phải hoặc nút ✏️ Đổi trong form vào phòng.
@@ -146,6 +162,8 @@ src/                                   mã nguồn
          stage3d.js (sân khấu)  tips.js (mẹo diễn)  keys.js  main.js   Diễn Tả
   nhanvat.js       Tủ đồ nhân vật
   nhai/engine.js  score.js (chấm điểm)  audio.js (phát/thu)  main.js   Nhại Như Thật
+  caro/engine.js  main.js   Cờ Caro
+  bay/world.js (vật lý, cột)  engine.js  main.js   Vỗ Cánh Sinh Tồn
   site.js          Hồ sơ chung + đếm online
 build.sh                               đóng gói src/ → assets/
 ```
