@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ma Sói Online</title>
+  <meta name="description" content="Chơi Ma Sói online cùng bạn bè: chat, voice, không cần cài đặt." />
+  <meta name="theme-color" content="#7c4dff" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet" />
+  <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="sky" aria-hidden="true"><div class="stars s1"></div><div class="stars s2"></div></div>
+
+  <!-- ======= TRANG CHỦ ======= -->
+  <main id="home" class="screen">
+    <nav class="home-nav">
+      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-sq" data-logo></span>Ma Sói</a>
+      <div class="nav-right"><button class="theme-btn" type="button" data-theme-toggle></button><a href="index.html" class="btn sm">← Tất cả game</a><a href="#" id="rulesLink" class="btn sm">Luật chơi</a></div>
+    </nav>
+
+    <section class="home-grid">
+      <div>
+        <span class="chip hero-badge">⚡ Không đăng ký · Không máy chủ</span>
+        <h1 class="home-title">Ma Sói <span class="hl">online</span><br/>cho <span class="hl2">hội bạn</span></h1>
+        <p class="home-lead">Tạo phòng, gửi link, vào chơi ngay trên trình duyệt. Có chat, có voice, game tự làm quản trò.</p>
+        <div class="sticker-row" id="roleStrip"></div>
+      </div>
+
+      <form id="homeForm" class="card join-card" autocomplete="off">
+        <h2>Bạn là ai trong làng?</h2>
+        <div class="me-row">
+          <span class="avatar xl" id="avPreview"></span>
+          <label class="field">
+            <span>Tên hiển thị</span>
+            <input id="nameInput" maxlength="18" placeholder="VD: Sói Già" required />
+          </label>
+        </div>
+        <div>
+          <div class="lbl-sm" style="margin-bottom:6px">Avatar</div>
+          <div class="emoji-grid" id="emojiGrid"></div>
+        </div>
+        <div>
+          <div class="lbl-sm" style="margin-bottom:8px">Màu nền</div>
+          <div class="color-row" id="colorRow"></div>
+        </div>
+        <div class="seg" role="tablist">
+          <button type="button" class="seg-btn active" data-mode="create">Tạo phòng</button>
+          <button type="button" class="seg-btn" data-mode="join">Vào phòng</button>
+        </div>
+        <label class="field join-only">
+          <span>Mã phòng</span>
+          <input id="codeInput" maxlength="6" placeholder="ABC123" class="code-input" />
+        </label>
+        <button class="btn primary big" id="homeSubmit" type="submit">Tạo phòng mới →</button>
+      </form>
+    </section>
+
+    <section class="how">
+      <h2>Chơi trong 3 bước</h2>
+      <div class="how-grid">
+        <div class="card how-card"><span class="n" style="background:var(--sun)">1</span><b>Tạo phòng</b><p>Chọn tên, avatar rồi bấm tạo phòng. Bạn là chủ phòng.</p></div>
+        <div class="card how-card"><span class="n" style="background:var(--sky);color:#fff">2</span><b>Gửi link mời</b><p>Bạn bè mở link là vào thẳng làng, không cần tài khoản.</p></div>
+        <div class="card how-card"><span class="n" style="background:var(--pink);color:#fff">3</span><b>Đêm buông xuống</b><p>Mỗi người nhận một vai bí mật. Bật mic và bắt đầu cãi nhau!</p></div>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>Các vai trong làng</h2>
+      <div class="role-cards" id="roleCards"></div>
+    </section>
+
+    <p class="foot">Kết nối P2P trực tiếp giữa các trình duyệt · không lưu dữ liệu trên server</p>
+  </main>
+
+  <!-- ======= PHÒNG ======= -->
+  <div id="room" class="screen hidden">
+    <header class="topbar">
+      <button class="brand" id="leaveBtn" title="Rời phòng"><span class="logo-sq" data-logo></span><span class="brand-txt">Ma Sói</span></button>
+      <button class="chip code-chip" id="codeChip" title="Sao chép link mời"></button>
+      <div class="phase-pill" id="phasePill"></div>
+      <div class="voice-ctl">
+        <button class="theme-btn icon-btn" type="button" data-theme-toggle></button>
+        <button class="icon-btn" id="micBtn" title="Bật mic"></button>
+        <button class="icon-btn" id="deafBtn" title="Tắt tiếng"></button>
+      </div>
+      <div class="timebar"><i id="timebar"></i></div>
+    </header>
+    <div id="hostLost" class="banner hidden">Mất kết nối với chủ phòng. Đang chờ chủ phòng quay lại...</div>
+
+    <div class="room-body" data-tab="stage">
+      <section id="stage" class="stage"></section>
+      <aside id="side" class="side">
+        <div id="mycard"></div>
+        <div class="chat panel">
+          <div class="chat-tabs" id="chatTabs"></div>
+          <div class="chat-list" id="chatList"></div>
+          <form id="chatForm" class="chat-form" autocomplete="off">
+            <input id="chatInput" maxlength="300" placeholder="Nhắn gì đó..." />
+            <button class="btn primary" type="submit" aria-label="Gửi">Gửi</button>
+          </form>
+        </div>
+      </aside>
+    </div>
+
+    <nav class="mobile-tabs">
+      <button data-tab="stage" class="active"><span class="mt-ic" data-ic="users"></span>Làng</button>
+      <button data-tab="side"><span class="mt-ic" data-ic="chat"></span>Chat<b id="chatBadge" class="badge hidden"></b></button>
+    </nav>
+  </div>
+
+  <div id="overlay" class="overlay hidden"></div>
+  <div id="toasts"></div>
+  <div id="audio-sink" hidden></div>
+
+  <script src="site-config.js"></script>
+  <script defer src="assets/masoi.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tủ Đồ Nhân Vật</title>
+  <meta name="description" content="Xem và chọn nhân vật 3D cho game Diễn Tả Hình Hài." />
+  <meta name="theme-color" content="#7c4dff" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet" />
+  <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dienta wardrobe">
+  <main class="screen" id="home">
+    <nav class="home-nav">
+      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-sq" data-logo></span>Sân Chơi Hội Bạn</a>
+      <div class="nav-right"><button class="theme-btn" type="button" data-theme-toggle></button><a href="dienta.html" class="btn sm primary">🎭 Vào chơi</a></div>
+    </nav>
+    <section class="wd-head">
+      <span class="chip hero-badge" style="background:var(--sun)">🧸 Tủ đồ</span>
+      <h1 class="home-title" style="font-size:clamp(34px,5vw,54px)">Nhân vật <span class="hl" style="background:var(--pink)">Bé Đụt</span></h1>
+      <p class="home-lead"><b id="wdCount"></b> nhân vật để chọn. Bấm thử các tư thế, biểu cảm, xoay người — nhân vật bạn chọn ở đây sẽ được dùng khi vào phòng Diễn Tả.</p>
+    </section>
+    <section class="wd-grid">
+      <div class="card wd-stage">
+        <div class="wd-view" id="wdView"></div>
+        <div class="wd-name"><span id="wdEmo"></span><b id="wdName"></b><button class="btn sm primary" id="wdPick">✔ Chọn nhân vật này</button></div>
+      </div>
+      <div class="card wd-side">
+        <div class="lbl-sm">Thử tư thế</div>
+        <div class="wd-chips" id="wdPoses"></div>
+        <div class="lbl-sm">Biểu cảm</div>
+        <div class="wd-chips" id="wdFaces"></div>
+        <div class="lbl-sm">Xoay người</div>
+        <div class="wd-chips" id="wdTurns"></div>
+        <label class="toggle" style="padding:6px 0 0"><input type="checkbox" id="wdAuto" checked /> Tự đổi tư thế liên tục</label>
+      </div>
+    </section>
+    <section class="card wd-list-card">
+      <div class="sect-title"><h2 style="margin:0">Chọn nhân vật</h2><input id="wdSearch" class="field-in" placeholder="🔎 Tìm: chú, cô, khủng long..." /></div>
+      <div class="skin-grid wd-list" id="wdList"></div>
+    </section>
+  </main>
+  <div id="toasts"></div>
+  <script defer src="assets/nhanvat.js"></script>
+</body>
+</html>

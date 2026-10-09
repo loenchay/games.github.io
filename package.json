@@ -1,0 +1,13 @@
+{
+  "name": "san-choi-hoi-ban",
+  "private": true,
+  "description": "Mini game P2P: Ma Sói, Diễn Tả Hình Hài",
+  "scripts": {
+    "build": "sh build.sh"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "three": "0.169.0"
+  },
+  "type": "module"
+}
