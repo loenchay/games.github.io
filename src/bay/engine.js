@@ -84,7 +84,7 @@ export class BayEngine {
     s.seed = (Math.random() * 2 ** 31) >>> 0;
     s.startAt = this.now() + COUNTDOWN_MS;
     s.racers = racers;
-    s.dead = {}; s.live = {}; s.winner = null; s.results = null; this.seen = {};
+    s.dead = {}; s.live = {}; s.winner = null; s.results = null; s.soloLogged = 0; this.seen = {};
     s.phase = 'count';
     for (const c of racers) { const p = this.P(c); if (p) p.rounds++; }
     this.log(`Ván ${s.round}: ${racers.length} chú chim cất cánh! Ai trụ lại cuối cùng sẽ thắng.`, 'phase');
@@ -117,7 +117,9 @@ export class BayEngine {
     const s = this.s;
     if (s.phase !== 'play' && s.phase !== 'count') return;
     const alive = s.racers.filter((c) => !s.dead[c]);
-    if (s.racers.length >= 2 ? alive.length <= 1 : alive.length === 0) this.finish(alive[0] || null);
+    // không dừng khi chỉ còn 1 chim: chim cuối cùng bay tiếp tới khi rơi (ai trụ lâu nhất thắng)
+    if (alive.length === 1 && s.racers.length >= 2 && !s.soloLogged) { s.soloLogged = 1; this.log(`🐤 Chỉ còn ${this.name(alive[0])}! Bay tiếp tới khi rơi để nâng kỷ lục.`, 'info'); }
+    if (alive.length === 0) this.finish(null);
   }
 
   finish(survivor) {
@@ -131,7 +133,7 @@ export class BayEngine {
     s.results = res.map((r) => ({ ...r, t: Number.isFinite(r.t) ? Math.round(r.t * 10) / 10 : null }));
     s.winner = winner;
     s.phase = 'over';
-    this.log(winner ? `🏆 ${this.name(winner)} là chú chim trụ lại cuối cùng!` : `Ván tập bay kết thúc: ${res[0]?.score ?? 0} cột.`, 'win');
+    this.log(winner ? `🏆 ${this.name(winner)} là chú chim trụ lâu nhất!` : `Ván tập bay kết thúc: ${res[0]?.score ?? 0} cột.`, 'win');
     this.onEvent({ type: 'over', winner });
     this.changed();
   }

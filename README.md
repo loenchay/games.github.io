@@ -145,7 +145,7 @@ Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản 
 ## Vỗ Cánh Sinh Tồn
 
 - Tối đa **16 người** cùng bay trên một bầu trời. Chủ phòng bấm **Cất cánh** → đếm ngược 3 giây → bay. Chạm màn hình hoặc bấm **Space / ↑ / W** để vỗ cánh.
-- Đụng cột hoặc rơi xuống đất là thua. **Chú chim trụ lại cuối cùng thắng** (nếu cùng rơi thì ai rơi sau thắng). Bay 1 mình = chế độ tập.
+- Đụng cột hoặc rơi xuống đất là thua. **Chú chim trụ lại cuối cùng thắng** — khi chỉ còn 1 chim, ván chưa kết thúc mà chim đó bay tiếp tới khi rơi (để nâng kỷ lục cột). Bay 1 mình = chế độ tập.
 - Càng bay càng nhanh, khe càng hẹp, nên ván nào cũng có hồi kết. 3 độ khó: Thong thả / Vừa / Khó.
 - Mọi máy dùng chung một "hạt giống" nên thấy y hệt các cột; mỗi người tự điều khiển chim của mình và gửi vị trí cho mọi người xem (chim người khác hiện mờ kèm tên — khi mình đang bay thì càng mờ và nhỏ hơn để dễ tập trung vào chim của mình).
 - Ai ẩn tab / mất mạng quá 4 giây khi đang bay sẽ bị coi là rơi, để ván không bị treo.

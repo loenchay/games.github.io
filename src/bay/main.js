@@ -426,6 +426,10 @@ function frame(now) {
     rr(10, 10, 112, 26, 13, c); c.fillStyle = '#fff'; c.fill(); c.lineWidth = 2; c.strokeStyle = EDGE; c.stroke();
     c.fillStyle = EDGE; c.textBaseline = 'middle'; c.fillText(`🐤 còn ${alive}/${pub.racers.length}`, 20, 23.5); c.restore();
     if (T > 0 && T < 2.2 && b && b.hovering) bigText(c, 'Vỗ cánh đi!', 330, 26, '#ffe14d');
+    if (alive === 1 && pub.racers.length > 1) {
+      const last = pub.racers.find((x) => !pub.dead[x]);
+      bigText(c, last === app.cid ? 'Chỉ còn bạn — bay tiếp tới khi rơi!' : `Chỉ còn ${P(last)?.name || '?'} đang bay...`, 118, 18, '#ffe14d');
+    }
     if (b && !b.alive) bigText(c, 'Rơi rồi! Đang xem...', 300, 26, '#ff8fa3');
     if (!b) bigText(c, '👀 Đang xem ván này', 300, 22);
   } else if (pub.phase === 'over') {
@@ -450,7 +454,7 @@ function renderPanel() {
   if (pub.phase === 'lobby') st.innerHTML = host ? `<b>${n} người trong phòng.</b> Gửi link mời rồi bấm <b>Cất cánh</b> khi đủ người (bay 1 mình để tập cũng được).` : `<b>${n} người trong phòng.</b> Đợi chủ phòng bấm Cất cánh...`;
   else if (pub.phase === 'count') st.innerHTML = '<b>Chuẩn bị!</b> Chạm vào bầu trời hoặc bấm phím cách / ↑ để vỗ cánh.';
   else if (pub.phase === 'play') st.innerHTML = app.bird ? (app.bird.alive ? '<b>Bay đi!</b> Luồn qua khe giữa các cột. Đụng cột hoặc đất là rơi.' : '<b>Bạn đã rơi.</b> Xem ai trụ lại cuối cùng nhé!') : '<b>Bạn vào giữa ván</b> — đang xem, ván sau sẽ được bay.';
-  else st.innerHTML = pub.winner ? `🏆 <b>${esc(P(pub.winner)?.name)}</b> trụ lại cuối cùng!` : 'Kết thúc ván tập bay.';
+  else st.innerHTML = pub.winner ? `🏆 <b>${esc(P(pub.winner)?.name)}</b> trụ lâu nhất!` : 'Kết thúc ván tập bay.';
   const modes = [['chill', '🌤️ Thong thả'], ['normal', '🌬️ Vừa'], ['hard', '🌪️ Khó']];
   const canCfg = host && !['count', 'play'].includes(pub.phase);
   const key = `${pub.phase}|${pub.config.mode}|${host}`;
