@@ -8,6 +8,7 @@ import { SKINS, SKIN_IDS, CONTROLS, PROP_LIST } from './puppet.js';
 import { createPuppet } from './puppet3d.js';
 import { Keymap, keyLabel, eventKey, actionGroups } from './keys.js';
 import { parseTip } from './tips.js';
+import { gameIdentity, startPresence, presenceUpdate } from '../site.js';
 
 const keymap = new Keymap();
 const kbd = (id) => { const k = keymap.keyOf(id); return k ? `<kbd>${esc(keyLabel(k))}</kbd>` : ''; };
@@ -135,7 +136,8 @@ function initHome() {
   };
   $('#photoClear').onclick = () => { app.look.head = ''; $('#photoLink').value = ''; saveLook(); drawSkins(); show(); };
 
-  avatarPicker($('#avPick'), prof, () => {});
+  gameIdentity(prof);
+  startPresence(prof, 'Đang ở Diễn Tả Hình Hài');
 
   const ro = loadRoomOpts();
   const homeCats = loadData(window.DIENTA_DATA).categories;
@@ -198,6 +200,7 @@ function shrinkImage(file, size) {
 
 // ================= VÀO PHÒNG =================
 async function enterRoom(code, host) {
+  presenceUpdate('🎭 Đang chơi Diễn Tả Hình Hài');
   app.code = code;
   app.isHost = host;
   ss.set('dienta-session', JSON.stringify({ code, host }));

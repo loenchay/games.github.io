@@ -7,4 +7,5 @@ npx esbuild src/catalog.js --bundle --format=iife --target=es2020 --legal-commen
 npx esbuild src/masoi.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/masoi.js
 npx esbuild src/dienta/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/dienta.js
 npx esbuild src/nhanvat.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/nhanvat.js
+npx esbuild src/nhai/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/nhai.js
 echo "Xong! Đã cập nhật assets/"

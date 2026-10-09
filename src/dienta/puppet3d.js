@@ -96,7 +96,7 @@ const fx_ = (lon) => 50 + (lon / SPREAD) * 50;
 const fy_ = (lat) => 50 - (lat / SPREAD) * 50;
 
 // Vẽ phần mặt phẳng: miệng, lông mày, má hồng, mắt nhắm/tim (khi mắt 3D bị ẩn)
-export function faceTex(face, { eyes3D = true, wink = false, extras = [] } = {}) {
+export function faceTex(face, { eyes3D = true, wink = false, extras = [], noMouth = false } = {}) {
   const ex = fx_(-EYE.lon), ex2 = fx_(EYE.lon), ey = fy_(EYE.lat);
   const L = 'fill="none" stroke="#1d1648" stroke-linecap="round" stroke-linejoin="round"';
   let s = '';
@@ -138,6 +138,7 @@ export function faceTex(face, { eyes3D = true, wink = false, extras = [] } = {})
     cheeky: `<path d="M40 ${my - 2} Q50 ${my + 7} 60 ${my - 3}" ${L} stroke-width="2.8"/><path d="M50 ${my + 2} q2 10 8 2 z" fill="#ff6f8a" stroke="#1d1648" stroke-width="1.6" stroke-linejoin="round"/>`,
     love: `<path d="M40 ${my - 3} Q50 ${my + 9} 60 ${my - 3}" ${L} stroke-width="2.8"/>`,
   };
+  if (noMouth) return s; // miệng 3D đang nhép theo âm thanh
   s += M[face] || M.neutral;
   if (extras.includes('fangs')) s += `<path d="M44 ${my + 1} l1.6 4 l1.6 -4 M53 ${my + 1} l1.6 4 l1.6 -4" fill="#fff" stroke="#1d1648" stroke-width="1"/>`;
   return s;
@@ -302,6 +303,26 @@ export function createPuppet(container, opts = {}) {
     eyes.push({ g, inner, white, pupil, shine, lidPivot, lid, sx, px: 0, py: 0, wx: 0, wy: 0 });
   }
 
+  // miệng 3D để nhép theo âm thanh (game Nhại)
+  const talkMouth = new Group();
+  {
+    const mp = onHead(0, -0.36, HR * 0.985);
+    talkMouth.position.copy(mp);
+    talkMouth.lookAt(mp.clone().multiplyScalar(3));
+    const hole = part(new SphereGeometry(0.13, 24, 16), 0x5a1424, { thin: true });
+    hole.scale.set(1.25, 1, 0.35);
+    talkMouth.add(hole);
+    const tongue = new Mesh(new SphereGeometry(0.08, 16, 12), new MeshBasicMaterial({ color: 0xff7b93 }));
+    tongue.scale.set(1.2, 0.6, 0.3); tongue.position.set(0, -0.06, 0.03);
+    talkMouth.add(tongue);
+    const teeth = new Mesh(new BoxGeometry(0.12, 0.045, 0.02), new MeshBasicMaterial({ color: 0xffffff }));
+    teeth.position.set(0, 0.095, 0.045);
+    talkMouth.add(teeth);
+    talkMouth.userData.hole = hole;
+    talkMouth.visible = false;
+    headScale.add(talkMouth);
+  }
+  let talkOn = false, talkLv = 0;
   const headAcc = new Group();
   headScale.add(headAcc); // cùng tỉ lệ với quả đầu để tóc/mũ ôm khít
   const earG = new Group();
@@ -785,10 +806,10 @@ export function createPuppet(container, opts = {}) {
     const eyes3D = !photoOn && !noEyes && !EYE3D_HIDE[f];
     const wink = f === 'cheeky';
     for (const e of eyes) e.g.visible = eyes3D && !(wink && e.sx < 0);
-    const key = `${f}|${eyes3D}|${photoOn}|${extras.join(',')}|${noEyes}`;
+    const key = `${f}|${eyes3D}|${photoOn}|${extras.join(',')}|${noEyes}|${talkOn}`;
     if (key !== lastFaceKey) {
       lastFaceKey = key;
-      faceMat.map = svgTexture(key, photoOn ? '' : faceTex(f, { eyes3D: eyes3D || noEyes, wink, extras }));
+      faceMat.map = svgTexture(key, photoOn ? '' : faceTex(f, { eyes3D: eyes3D || noEyes, wink, extras, noMouth: talkOn }));
       faceMat.needsUpdate = true;
     }
     faceMesh.visible = !photoOn;
@@ -893,6 +914,7 @@ export function createPuppet(container, opts = {}) {
     if (crawl) { hrz = 0; hrx = 68 * D2R; hry = -1.0; }
     if (pose.body === 'lie') { hry = 0.25; }
     let bob = 0;
+    const tk = talkOn ? spring('talk', talkLv, 0.45, 0.5) : 0;
     if (!loop && !fx) bob = Math.abs(sin(0.55)) * 0.025; // nhún nhẹ khi đứng yên
     if (loop === 'walk') { bob = Math.abs(sin(1.3)) * 0.1; hrz += sin(1.3) * 0.08; }
     if (loop === 'run') { bob = Math.abs(sin(2.4)) * 0.22; hrx += 0.25; }
@@ -908,6 +930,11 @@ export function createPuppet(container, opts = {}) {
       else if (fx.name === 'spin') { if (e < 0.9) { fxSpin = (1 - Math.pow(1 - e / 0.9, 3)) * Math.PI * 2; fxY = Math.sin((e / 0.9) * Math.PI) * 0.3; } else fx = null; }
       else if (fx.name === 'fall') { if (e < 1.8) fxFall = Math.min(1, e / 0.35) * (e > 1.4 ? (1.8 - e) / 0.4 : 1) * 1.45; else fx = null; }
       else if (fx.name === 'bounce') { if (e < 1.1) { const ph = e * Math.PI * 3.6; fxY = Math.abs(Math.sin(ph)) * 0.32 * (1 - e / 1.1); sq = (Math.abs(Math.sin(ph)) < 0.3 ? -0.14 : 0.06) * (1 - e / 1.1); } else fx = null; }
+    }
+    if (talkOn) {
+      bob += tk * 0.1;
+      const o = Math.max(0.06, Math.min(1, tk * 1.6));
+      talkMouth.scale.set(0.8 + o * 0.35, 0.2 + o * 1.1, 1);
     }
     fig.rotation.y = spring('turn', TURN[pose.turn] ?? 0, 0.12, 0.74);
     const yS = spring('hy', hy + bob, 0.18, 0.7);
@@ -937,6 +964,7 @@ export function createPuppet(container, opts = {}) {
     if (pose.head === 'down' || (b.headDown && (!pose.head || pose.head === 'center'))) nx = 0.38;
     if (pose.body === 'bow') nx -= 0.3;
     if (!loop) { nz += sin(0.3) * 0.07; ny += sin(0.17) * 0.12; }
+    if (talkOn) { nx -= tk * 0.35; nz += Math.sin(t * 7.3) * tk * 0.12; }
     if (loop === 'nod') nx += sin(2.5) * 0.3;
     if (loop === 'shake') ny += sin(2.2) * 0.6;
     if (loop === 'dance') nz += sin(2) * 0.18;
@@ -971,6 +999,7 @@ export function createPuppet(container, opts = {}) {
       if (loop === 'row') { ux += sin(1) * 40 - 30; fxx -= 40; }
       if (loop === 'shiver') uz += sin(9, ph) * 4;
       if (opt === 'wave') fz += sin(2.8) * 32 * sign;
+      if (talkOn && opt === 'down' && !loop) { uz += tk * (40 + Math.sin(t * 9 + i * 2) * 25) * sign; fz -= tk * 50 * sign; }
       J['arm' + s].rotation.set(spring('ux' + s, ux * D2R, 0.15, 0.7), 0, spring('uz' + s, -uz * D2R, 0.15, 0.7));
       // khuỷu tay trễ nhịp hơn chút -> tay dẻo như sợi mì
       J['fore' + s].rotation.set(spring('fx' + s, fxx * D2R, 0.11, 0.72), 0, spring('fz' + s, -fz * D2R, 0.11, 0.72));
@@ -1070,5 +1099,11 @@ export function createPuppet(container, opts = {}) {
 
   setLook({ skin: 'tron' });
   setPose({ body: 'stand', head: 'center', face: 'neutral', armL: 'down', armR: 'down', legL: 'down', legR: 'down' });
-  return { setPose, setLook, el: canvas, dispose, cheer, is3D: true };
+  // Nhép miệng theo âm lượng (0..1); null = tắt
+  function setTalk(level) {
+    const on = level != null && !photo.visible;
+    if (on !== talkOn) { talkOn = on; talkMouth.visible = on; lastFaceKey = ''; applyFace(); }
+    talkLv = on ? Math.max(0, Math.min(1, level)) : 0;
+  }
+  return { setPose, setLook, setTalk, el: canvas, dispose, cheer, is3D: true };
 }

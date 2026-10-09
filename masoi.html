@@ -33,18 +33,18 @@
 
       <form id="homeForm" class="card join-card" autocomplete="off">
         <h2>Bạn là ai trong làng?</h2>
-        <div class="me-row">
+        <div class="me-row" data-identity>
           <span class="avatar xl" id="avPreview"></span>
           <label class="field">
             <span>Tên hiển thị</span>
             <input id="nameInput" maxlength="18" placeholder="VD: Sói Già" required />
           </label>
         </div>
-        <div>
+        <div data-identity>
           <div class="lbl-sm" style="margin-bottom:6px">Avatar</div>
           <div class="emoji-grid" id="emojiGrid"></div>
         </div>
-        <div>
+        <div data-identity>
           <div class="lbl-sm" style="margin-bottom:8px">Màu nền</div>
           <div class="color-row" id="colorRow"></div>
         </div>

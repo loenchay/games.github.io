@@ -3,6 +3,8 @@ import { createNet } from './net.js';
 import { Engine, suggestRoles, MIN_PLAYERS } from './engine.js';
 import { Voice } from './voice.js';
 import { ROLES, ROLE_ORDER, ICONS, AVATARS, AV_COLORS, roleBadge, icon } from './roles.js';
+import { loadProfile } from './common.js';
+import { gameIdentity, startPresence, presenceUpdate } from './site.js';
 
 // ================= trạng thái =================
 const $ = (s, el = document) => el.querySelector(s);
@@ -81,6 +83,13 @@ function initHome() {
   };
   const saveAv = () => ls.set('masoi-av', JSON.stringify(app.av));
   drawAv();
+  // hồ sơ chung (tên + avatar nhập 1 lần ở mọi trang)
+  const prof = loadProfile();
+  if (prof.name) app.name = prof.name;
+  app.av = prof.av;
+  drawAv();
+  gameIdentity(prof, { onChange: (p) => { app.name = p.name; app.av = p.av; drawAv(); } });
+  startPresence(prof, 'Đang ở Ma Sói');
   const form = $('#homeForm');
   let mode = 'create';
   const setMode = (m) => {
@@ -114,6 +123,7 @@ function initHome() {
 
 // ================= vào phòng =================
 async function enterRoom(code, host) {
+  presenceUpdate('🐺 Đang chơi Ma Sói');
   app.code = code;
   app.isHost = host;
   ss.set('masoi-session', JSON.stringify({ code, host }));

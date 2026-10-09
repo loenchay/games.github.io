@@ -1,7 +1,8 @@
 // Trang "Tủ đồ nhân vật": xem thử toàn bộ nhân vật 3D và chọn nhân vật mặc định.
 import './theme.js';
 import { ICONS } from './roles.js';
-import { $, $$, esc, ls, toast } from './common.js';
+import { $, $$, esc, ls, toast, loadProfile } from './common.js';
+import { profileChip, requireProfile, startPresence } from './site.js';
 import { createPuppet } from './dienta/puppet3d.js';
 import { CHARS, CHAR_MAP } from './dienta/chars.js';
 
@@ -55,3 +56,10 @@ $('#wdSearch').oninput = drawList;
 $('#wdCount').textContent = CHARS.length;
 setInterval(() => { if (!$('#wdAuto').checked) return; poseI = (poseI + 1) % POSES.length; pose = { ...BASE, ...POSES[poseI][1] }; apply(); }, 2600);
 apply(); drawList(); drawInfo();
+// quay lại đúng game đã mở tủ đồ
+{ const back = new URLSearchParams(location.search).get('back'); if (back && /^[a-z]+\.html$/.test(back)) { const a = $('#wdBack'); a.href = back; if (back === 'nhai.html') a.textContent = '🎤 Quay lại game'; } }
+
+const prof = loadProfile();
+profileChip(prof);
+requireProfile(prof, () => profileChip(prof));
+startPresence(prof, 'Đang xem tủ đồ nhân vật');

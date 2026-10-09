@@ -90,6 +90,23 @@ Mở `data/dienta-data.js` bằng một trình soạn thảo bất kỳ. Mỗi d
 
 > File đề là JSON bọc trong `window.DIENTA_DATA = ...;`. Bọc như vậy là để mở trực tiếp từ ổ đĩa vẫn đọc được, vì Chrome không cho trang mở từ file đọc trực tiếp file `.json`.
 
+## Nhại Như Thật (game mới)
+
+Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản nhại được phát trên sân khấu 3D, nhân vật của người nhại nhép miệng theo tiếng. Cuối mỗi đề: máy chấm + mọi người bỏ phiếu.
+
+- **Một đề:** nghe mẫu (1–3 lần) → đếm ngược 3-2-1 → mọi người cùng thu → trình diễn lần lượt (bản gốc trước) → bỏ phiếu (không tự bầu) → kết quả.
+- **Máy chấm** (`src/nhai/score.js`): so đường cao độ tương đối (giọng nam/nữ đều được) và nhịp to–nhỏ, dài–ngắn bằng DTW. Không hiểu chữ, chỉ nghe ngữ điệu và nhịp. Tuỳ chọn phòng: *máy chấm + bỏ phiếu* (mặc định), *chỉ máy chấm*, *chỉ bỏ phiếu*.
+- **45 âm mẫu tự tổng hợp** (không dùng âm thanh có bản quyền): con vật, câu cửa miệng (Alô alô, Ối dồi ôi, Hả???…), tiếng động meme (kèn buồn, còi hơi, ba-dum-tss, còi cảnh sát…), giai điệu dân gian / đã hết bản quyền. File gốc ở `sounds/`, bản nhúng ở `data/nhai-data.js`; tạo lại bằng `gen/sounds.py`.
+- **Đề tự thêm ngay trong phòng chờ:** ai cũng thu được 5 giây hoặc chọn file âm thanh trên máy (VD: âm meme tải về), tối đa 8 giây. Đề tự thêm được chơi trước.
+- Trong lúc nghe / thu / trình diễn, voice chat tự tắt để không lẫn tiếng.
+- Bản thu được nén (12kHz, 8 bit) và gửi thẳng cho người trong phòng, không lưu ở đâu cả.
+
+## Hồ sơ chung + số người online
+
+- Lần đầu mở trang (bất kỳ trang nào), web hỏi tên + avatar một lần. Vào game nào cũng dùng luôn; đổi ở chip tên góc phải hoặc nút ✏️ Đổi trong form vào phòng.
+- Góc phải có chip **🟢 N online**: đếm mọi người đang mở Sân Chơi (mọi trang, mọi game). Bấm vào để xem ai đang online và đang ở game nào. Cách đếm: mọi người cùng vào một "phòng" P2P chung, nên phù hợp nhóm nhỏ (vài chục người); nhiều người hơn sẽ nặng máy.
+- Thử nhiều người trên một máy: thêm `?local=1&as=Tên` vào link mỗi tab.
+
 ## Deploy lên GitHub Pages
 
 1. Tạo repo **public** mới trên GitHub.
@@ -128,6 +145,8 @@ src/                                   mã nguồn
   dienta/engine.js  puppet.js (2D + bảng tư thế)  puppet3d.js (nhân vật 3D)  chars.js (danh sách nhân vật)
          stage3d.js (sân khấu)  tips.js (mẹo diễn)  keys.js  main.js   Diễn Tả
   nhanvat.js       Tủ đồ nhân vật
+  nhai/engine.js  score.js (chấm điểm)  audio.js (phát/thu)  main.js   Nhại Như Thật
+  site.js          Hồ sơ chung + đếm online
 build.sh                               đóng gói src/ → assets/
 ```
 

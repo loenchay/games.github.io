@@ -28,12 +28,18 @@ export const roomCode = () => rid(6).toUpperCase();
 
 // ---- hồ sơ người chơi (dùng chung giữa các game) ----
 export function loadProfile() {
+  // chế độ thử nhiều tab (?local=1&as=Tên): mỗi tab một người, không ghi đè hồ sơ thật
+  if (LOCAL && params.get('as')) {
+    const n = params.get('as').slice(0, 18), h = [...n].reduce((a, c) => a + c.codePointAt(0), 0);
+    return { name: n, av: { e: AVATARS[h % AVATARS.length], c: h % AV_COLORS.length }, test: true };
+  }
   let av = null;
   try { av = JSON.parse(ls.get('masoi-av') || 'null'); } catch {}
   if (!av || !AVATARS.includes(av.e)) av = { e: AVATARS[Math.floor(Math.random() * AVATARS.length)], c: Math.floor(Math.random() * AV_COLORS.length) };
   return { name: ls.get('masoi-name') || '', av };
 }
 export function saveProfile(p) {
+  if (p.test) return;
   ls.set('masoi-name', p.name || '');
   ls.set('masoi-av', JSON.stringify(p.av));
 }

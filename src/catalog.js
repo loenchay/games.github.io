@@ -1,6 +1,7 @@
 import './theme.js';
 import { ICONS, roleBadge } from './roles.js';
 import { $, $$, esc, loadProfile, saveProfile, avatarHTML, avatarPicker } from './common.js';
+import { profileChip, requireProfile, startPresence } from './site.js';
 import { createPuppet } from './dienta/puppet3d.js';
 
 // Danh sách game — thêm game mới vào đây
@@ -17,27 +18,21 @@ const GAMES = [
     desc: 'Một người lên sân khấu điều khiển nhân vật diễn tả đề bài, cả phòng tranh nhau bấm chuông đoán chữ để ghi điểm.',
     art: (el) => { const p = createPuppet(el); p.setLook({ skin: 'idol' }); p.setPose({ body: 'stand', head: 'tiltL', face: 'happy', armL: 'wave', armR: 'hip', legL: 'step', legR: 'down', loop: 'dance' }); },
   },
+  {
+    id: 'nhai', url: 'nhai.html', name: 'Nhại Như Thật', color: 'var(--orange)', soft: 'var(--orange-soft)', isNew: true,
+    tag: 'Nhại giọng · Chấm điểm', players: '2–16 người', time: '10–15 phút',
+    desc: 'Nghe tiếng gà gáy, còi xe, câu "Ối dồi ôi"... rồi cả phòng cùng nhại lại. Máy chấm độ giống + mọi người bỏ phiếu.',
+    art: (el) => { const p = createPuppet(el); p.setLook({ skin: 'chotdon' }); p.setPose({ body: 'stand', head: 'center', face: 'happy', armL: 'down', armR: 'mouth', propR: 'mic', legL: 'down', legR: 'down' }); let ph = 0; setInterval(() => { ph += 0.2; p.setTalk?.(Math.max(0, Math.sin(ph * 3) * 0.6 + Math.sin(ph * 7.1) * 0.3)); }, 70); },
+  },
 ];
 
 const prof = loadProfile();
 $$('[data-logo]').forEach((el) => (el.innerHTML = ICONS.wolf));
 
-function drawProfile() {
-  $('#profileBtn').innerHTML = `${avatarHTML(prof, 'sm')}<span>${esc(prof.name || 'Đặt tên')}</span>`;
-}
-$('#profileBtn').onclick = () => {
-  const o = $('#overlay');
-  o.innerHTML = `<form class="modal panel" id="pf" style="text-align:left;display:grid;gap:14px">
-    <h2 style="margin:0">Hồ sơ của bạn</h2>
-    <label class="field"><span>Tên hiển thị</span><input id="pfName" maxlength="18" value="${esc(prof.name)}" placeholder="VD: Sói Già" /></label>
-    <div id="pfAv"></div>
-    <button class="btn primary big" type="submit">Lưu</button></form>`;
-  o.classList.remove('hidden');
-  avatarPicker($('#pfAv'), prof, drawProfile);
-  o.onclick = (e) => { if (e.target === o) o.classList.add('hidden'); };
-  $('#pf').onsubmit = (e) => { e.preventDefault(); prof.name = $('#pfName').value.trim(); saveProfile(prof); drawProfile(); o.classList.add('hidden'); };
-};
-drawProfile();
+// hồ sơ chung: bắt buộc đặt tên + avatar ngay khi vào trang
+profileChip(prof);
+requireProfile(prof, () => profileChip(prof));
+startPresence(prof, 'Đang chọn game');
 
 $('#gameCount').textContent = `${GAMES.length} game · sẽ còn thêm`;
 $('#gameGrid').innerHTML = GAMES.map((g) => `
