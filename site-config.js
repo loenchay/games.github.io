@@ -10,6 +10,17 @@ window.SITE_CONFIG = {
     { urls: 'turn:global.relay.metered.ca:443', username: '97081191f34681a21c2cd592', credential: 'roe2Hcwgq9OdQmaK' },
     { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: '97081191f34681a21c2cd592', credential: 'roe2Hcwgq9OdQmaK' },
   ],
-  // Danh sách Nostr relay để các máy tìm thấy nhau. Để trống = dùng mặc định.
-  relayUrls: [],
+  // Nostr relay để các máy tìm thấy nhau (đã chọn các relay đang chạy tốt; mặc định của thư viện có vài cái đã chết).
+  // Mọi người phải dùng chung danh sách này, nên đổi xong nhớ deploy lại.
+  relayUrls: [
+    'wss://nostr-01.yakihonne.com',
+    'wss://nos.lol',
+    'wss://nostr.sathoarder.com',
+    'wss://basspistol.org',
+    'wss://nostr-relay.corb.net',
+    'wss://purplerelay.com',
+    'wss://nostr.data.haus',
+    'wss://relay02.lnfi.network',
+    'wss://relay.mostro.network',
+  ],
 };
