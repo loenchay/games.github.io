@@ -20,4 +20,6 @@ npx esbuild src/race/main.js --bundle --format=iife --target=es2020 --legal-comm
 npx esbuild src/daga/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/daga.js
 npx esbuild src/keoco/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/keoco.js
 npx esbuild src/xaythap/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/xaythap.js
+npx esbuild src/ransan/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/ransan.js
+npx esbuild src/thuthanh/main.js --bundle --format=iife --target=es2020 --legal-comments=none --minify --outfile=assets/thuthanh.js
 echo "Xong! Đã cập nhật assets/"

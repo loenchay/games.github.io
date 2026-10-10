@@ -141,10 +141,11 @@ export function startTableRoom(spec) {
       let stepped = false;
       while (acc >= STEP) { acc -= STEP; if (app.engine.step()) stepped = true; n++; }
       if (stepped || app.engine.s.phase === 'play') {
-        if (n >= 2) {
+        if (n >= (G.liveEvery || 2)) {
           n = 0;
           const d = app.engine.live();
-          if (d) { app.live = d; app.liveAt = now; app.net.send('live', d); }
+          // game trả lại đúng gói cũ (chưa đổi gì) thì khỏi gửi
+          if (d && d !== app.lastLive) { app.lastLive = d; app.live = d; app.liveAt = now; app.net.send('live', d); }
         }
       }
     };

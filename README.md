@@ -135,6 +135,20 @@ Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản 
 - Mạng: mỗi máy võ sĩ tự mô phỏng (tất định, số nguyên) và gửi phím bấm cho nhau; tín hiệu đối thủ tới trễ thì máy **đoán trước rồi tua lại** (rollback) nên vẫn mượt. Người xem vào giữa trận nhận ảnh chụp trận đấu rồi chạy tiếp.
 - Có nút **Tập với máy**. Code ở `src/fight/` (sim.js luật & va chạm, netplay.js đồng bộ, render.js vẽ, chars.js nhân vật, cpu.js máy đánh).
 
+## Rắn Săn Mồi (tới 10 rắn)
+
+- Tới 10 người (thêm rắn máy 0–6 con) chung một cánh đồng lưới 64×40. Mũi tên/`WASD` để rẽ (điện thoại: vuốt trên sân), giữ `Space`/`J` để tăng tốc (tốn bớt đuôi).
+- Ăn 🍎 +1, 🥖 +3, 🐸 ếch nhảy lung tung +5. Đầu đâm vào rào hay thân rắn khác (kể cả thân mình) là chết, thân rơi ra thành mồi. Đối đầu trực diện: con dài hơn thắng, bằng nhau cùng chết.
+- **Tính giờ** (2/3/5 phút): chết 3 giây hồi sinh, hạ gục +10 điểm, hết giờ nhiều điểm nhất thắng. **Sinh tồn**: không hồi sinh, sau 45 giây rào khép dần, con cuối cùng thắng.
+- Phòng tối đa 16 người. Code ở `src/ransan/`.
+
+## Thủ Thành Làng (1–4 người cùng phe)
+
+- Quái đi theo đường đất về cổng làng: 🐀 chuột đồng (nhanh), 🐗 heo rừng, 🐃 trâu điên (trâu, mất 2 máu), 🐦‍⬛ quạ đen (bay), mỗi 10 đợt có 👹 Chằn Tinh. Lọt cổng là làng mất máu, hết 20 máu là thua.
+- Mỗi người có vàng riêng để xây: 🏹 Chòi cung (nhanh, bắn được chim) · 🪨 Máy bắn đá (nổ một vùng, không trúng chim) · 🌀 Ao bùn (làm chậm) · 🧨 Pháo tre (nổ quanh chòi, trúng cả chim). Nâng cấp 3 cấp, chủ chòi bán lại được 70%.
+- Vàng từ mỗi con quái chia đều cho cả phe; có nút 🎁 tặng 50 vàng cho đồng đội; gọi quái sớm được thưởng vàng. 3 bản đồ (Đường Làng, Ngã Ba Sông có 2 lối vào, Vòng Xoáy), 10/20/30 đợt, 3 độ khó. Máu quái tăng theo số người chơi.
+- Code ở `src/thuthanh/`.
+
 ## Đá Gà Pixel (1–8 gà)
 
 - Mỗi người ngồi ghế điều khiển một con gà pixel (8 giống gà màu khác nhau); thiếu người thì thêm **gà máy** (0–4 con, chơi 1 mình luôn có gà máy).

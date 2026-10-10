@@ -1616,3 +1616,28 @@ canvas.pp3d { display: block; width: 100% !important; height: 100% !important; m
 .keoco .tb-seat .btn.sm { padding: 4px 6px; font-size: 11px; }
 .keoco .tb-seat .tag, .keoco .tb-seat .muted { font-size: 10px; }
 @media (max-width: 700px) { .keoco .tb-seats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* Rắn săn mồi */
+.rs-canvas { aspect-ratio: 960 / 600; touch-action: none; }
+.rs-pad { display: flex; justify-content: center; }
+.rs-pad.hidden { display: none; }
+.rs-boost { width: min(260px, 80%); height: 64px; border-radius: 18px; border: 3px solid #1d1648; background: #ffd43b; color: #1d1648; font: 900 20px var(--display, system-ui); box-shadow: 0 5px 0 #1d1648; touch-action: none; user-select: none; -webkit-user-select: none; }
+.rs-boost.on { transform: translateY(4px); box-shadow: 0 1px 0 #1d1648; }
+/* Thủ thành làng */
+.tt-canvas { aspect-ratio: 960 / 576; cursor: crosshair; }
+.tt-panel { padding: 12px; display: grid; gap: 10px; }
+.tt-team { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tt-mate { display: inline-flex; gap: 6px; align-items: center; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--pc); font-size: 13px; font-weight: 700; background: var(--surface); }
+.tt-mate .btn.sm { padding: 1px 6px; font-size: 12px; }
+.tt-team .btn.sun { margin-left: auto; }
+.tt-shop { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tt-buy { position: relative; display: grid; gap: 2px; justify-items: center; text-align: center; padding: 8px 6px; border-radius: 14px; border: 2.5px solid var(--edge, #1d1648); background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 0 3px 0 var(--edge, #1d1648); }
+.tt-buy .ic { font-size: 26px; line-height: 1; }
+.tt-buy b { font-size: 13px; }
+.tt-buy small { font-size: 11px; opacity: .75; line-height: 1.25; }
+.tt-buy kbd { position: absolute; top: 4px; right: 6px; font-size: 10px; opacity: .6; }
+.tt-buy.on { background: var(--sun); color: #1d1648; transform: translateY(2px); box-shadow: 0 1px 0 var(--edge, #1d1648); }
+.tt-buy:disabled { opacity: .45; cursor: not-allowed; }
+.tt-sel { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 8px 10px; border-radius: 12px; background: var(--sunken); }
+.tt-tip { font-size: 12px; text-align: center; }
+.tt-done { font: 800 18px var(--display, system-ui); text-align: center; }
+@media (max-width: 700px) { .tt-shop { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tt-buy small { display: none; } }

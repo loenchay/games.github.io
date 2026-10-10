@@ -15,6 +15,8 @@ import { initState as raceInit } from './race/sim.js';
 import { dagaDemo } from './daga/view.js';
 import { keocoDemo } from './keoco/view.js';
 import { xaythapDemo } from './xaythap/view.js';
+import { ransanDemo } from './ransan/view.js';
+import { thuthanhDemo } from './thuthanh/view.js';
 const raceArt = (c) => { const S = raceInit(['cub', 'lam'], { seed: 3, time: 60 }); S.phase = 'race'; S.c[0].x = 1150 * 100; S.c[1].x = 1320 * 100; S.c[0].l = 110 * 100; S.c[1].l = 190 * 100; S.camX = 1100 * 100; raceRender(c, S, new RaceFX(), 30, { names: ['', ''], riders: ['🐧', '🦖'], crowd: [], me: 0 }); };
 const fightArt = (c) => { const S = fightInit(['teo', 'sam'], {}); S.phase = 'fight'; S.f[0].x = 400 * 100; S.f[1].x = 560 * 100; S.f[0].st = 'win'; fightRender(c, S, new FightFX(), 30, { names: ['', ''], crowd: ['🦊', '🐼', '🐸'] }); };
 
@@ -55,6 +57,18 @@ const GAMES = [
     tag: 'Đối kháng · Chiến thuật', players: '2 chơi + 8 xem', time: '10–30 phút',
     desc: 'Cờ vua quốc tế đầy đủ luật: nhập thành, bắt tốt qua đường, phong cấp. Đồng hồ cho mỗi bên, 8 người vào xem.',
     art: (el) => { el.innerHTML = '<div class="cv-art"></div>'; chessBoard.render(el.firstChild, { st: fromFEN('r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4'), flip: false, sel: -1, targets: [], last: { from: 31, to: 13 }, check: 4 }); },
+  },
+  {
+    id: 'ransan', url: 'ransan.html', name: 'Rắn Săn Mồi', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,
+    tag: 'Hỗn chiến · Phản xạ', players: 'Tới 10 rắn + xem', time: '2–5 phút',
+    desc: 'Rắn săn mồi tuổi thơ nhưng cả phòng chung một sân: ăn mồi dài ra, chặn đầu nhau — ai đâm là thân rơi ra thành mồi!',
+    art: (el) => ransanDemo(el),
+  },
+  {
+    id: 'thuthanh', url: 'thuthanh.html', name: 'Thủ Thành Làng', color: 'var(--sky)', soft: 'var(--sky-soft)', isNew: true,
+    tag: 'Cùng phe · Chiến thuật', players: '1–4 người + xem', time: '10–25 phút',
+    desc: 'Cả phe xây chòi cung, máy bắn đá, ao bùn, pháo tre chặn chuột đồng, trâu điên và Chằn Tinh kéo về phá làng.',
+    art: (el) => thuthanhDemo(el),
   },
   {
     id: 'daga', url: 'daga.html', name: 'Đá Gà Pixel', color: 'var(--sun)', soft: 'var(--sun-soft)', isNew: true,
