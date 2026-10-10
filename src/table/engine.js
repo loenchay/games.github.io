@@ -7,7 +7,12 @@
 //   game.turn(state) -> ghế đang phải hành động (hoặc -1)  · game.turnKey(state) -> chuỗi đổi khi lượt đổi
 //   game.auto(state, seat, ctx)                    (đi thay khi hết giờ / mất mạng)
 //   game.view(state, seat) -> trạng thái gửi cho người ở ghế `seat` (-1 = người xem) — giấu bài người khác
-//   ctx: { log, fx, rng, now, name(seat), finish({ winners:[seat], rank:[seat], text }) }
+//   ctx: { log, fx, rng, now, name(seat), finish({ winners:[seat], rank:[seat], text }), seatIdx:[ghế gốc của từng người chơi] }
+// Game thời gian thực (Đá Gà, Kéo Co, Xây Tháp) thêm:
+//   game.step(state, inputs, ctx)   — chạy 60 lần/giây trên máy chủ phòng; inputs[seat] = phím/giá trị người chơi gửi lên
+//   game.live(state)                — gói nhỏ gửi cho mọi người ~30 lần/giây để vẽ
+//   game.watchAct(state, cid, a, ctx) — hành động của người xem (cổ vũ...)
+//   state.dirty = true              — báo cần gửi lại trạng thái đầy đủ
 
 export const MAX_PEOPLE = 10;
 export const TURN_TIMES = [0, 15, 30, 60];
@@ -34,7 +39,10 @@ export class TableEngine {
       now: () => self.now(),
       name: (seat) => self.name(self.s.order[seat]),
       finish: (r) => self.finish(r),
+      seatIdx: [],
+      cidOf: (seat) => self.s.order[seat],
     };
+    this.inputs = [];
   }
   P(cid) { return this.s.players.find((p) => p.cid === cid); }
   byPid(pid) { return this.s.players.find((p) => p.pid === pid); }
@@ -53,7 +61,8 @@ export class TableEngine {
     const av = this.cleanAv(info?.av);
     const ex = this.P(cid);
     if (ex) { ex.pid = pid; ex.connected = true; ex.name = name; ex.av = av; this.changed(); return null; }
-    if (this.s.players.filter((p) => p.connected).length >= MAX_PEOPLE) return `Phòng đã đủ ${MAX_PEOPLE} người.`;
+    const max = this.G.maxPeople || MAX_PEOPLE;
+    if (this.s.players.filter((p) => p.connected).length >= max) return `Phòng đã đủ ${max} người.`;
     let n = name, k = 2;
     while (this.s.players.some((p) => p.name === n)) n = `${name} ${k++}`;
     this.s.players.push({ cid, pid, name: n, av, connected: true, wins: 0, played: 0, score: 0 });
@@ -138,7 +147,10 @@ export class TableEngine {
       case 'g': {
         if (s.phase !== 'play') return 'Ván chưa bắt đầu.';
         const ps = s.order.indexOf(cid);
-        if (ps < 0) return 'Bạn đang là người xem.';
+        if (ps < 0) {
+          if (this.G.watchAct) { const err = this.G.watchAct(s.game, cid, a.a || {}, this.ctx); if (!err) this.afterAct(); return err; }
+          return 'Bạn đang là người xem.';
+        }
         const err = this.G.act(s.game, ps, a.a || {}, this.ctx);
         if (!err) this.afterAct();
         return err;
@@ -162,6 +174,8 @@ export class TableEngine {
     if (err) return err;
     // thứ tự chơi = thứ tự ghế (bỏ ghế trống)
     s.order = s.seats.filter((c) => c && this.P(c)?.connected);
+    this.ctx.seatIdx = s.seats.map((c, i) => (c && this.P(c)?.connected ? i : -1)).filter((i) => i >= 0);
+    this.inputs = s.order.map(() => 0);
     s.gameId++;
     s.result = null;
     s.phase = 'play';
@@ -199,6 +213,19 @@ export class TableEngine {
     this.onEvent({ type: 'over', winners });
     this.changed();
   }
+  // ----- thời gian thực -----
+  input(cid, v) {
+    const i = this.s.order.indexOf(cid);
+    if (i >= 0 && this.s.phase === 'play') this.inputs[i] = v;
+  }
+  step() {
+    const s = this.s;
+    if (s.phase !== 'play' || !this.G.step) return false;
+    this.G.step(s.game, this.inputs, this.ctx);
+    if (s.game && s.game.dirty) { s.game.dirty = false; if (s.phase === 'play') this.afterAct(); }
+    return s.phase === 'play';
+  }
+  live() { return this.s.game && this.G.live ? this.G.live(this.s.game) : null; }
   tick() {
     const s = this.s;
     if (s.phase !== 'play') return;
@@ -229,7 +256,7 @@ export class TableEngine {
       seats: s.seats, ready: s.ready, config: s.config, order: s.order, result: s.result,
       game: s.game && (s.phase === 'play' || s.phase === 'over') ? this.G.view(s.game, s.phase === 'over' ? -2 : seat) : null,
       canStart: s.phase !== 'play' ? this.canStart() : null,
-      log: s.log.slice(-40), max: MAX_PEOPLE, maxSeats: this.G.maxSeats, minSeats: this.G.minSeats,
+      log: s.log.slice(-40), max: this.G.maxPeople || MAX_PEOPLE, maxSeats: this.G.maxSeats, minSeats: this.G.minSeats,
     };
   }
 }

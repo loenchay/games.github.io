@@ -16,6 +16,7 @@ export function startTableRoom(spec) {
     cid: clientId(), code: null, isHost: false, net: null, engine: null, hostPid: null,
     pub: null, joined: false, endsAt: 0, chat: [], seenLog: 0, unread: 0,
     voice: null, speaking: new Set(), lastGame: 0, local: {},
+    live: null, liveAt: 0, myIn: null, inSentAt: 0,
   };
   if (LOCAL) window.__app = app;
   const cleanAv = (av) => ({ e: AVATARS.includes(av?.e) ? av.e : AVATARS[0], c: Number.isInteger(av?.c) && av.c >= 0 && av.c < AV_COLORS.length ? av.c : 0 });
@@ -98,6 +99,9 @@ export function startTableRoom(spec) {
     net.on('react', (d) => showReact(d));
     net.on('state', (d, pid) => { if (!app.isHost) { app.hostPid = pid; $('#hostLost').classList.add('hidden'); applyPub(d); } });
     net.on('fx', (d, pid) => { if (!app.isHost && pid === app.hostPid) playFx(d); });
+    // thời gian thực: người chơi gửi phím lên chủ phòng, chủ phòng gửi gói trạng thái nhỏ cho mọi người
+    net.on('in', (d, pid) => { if (!app.isHost) return; const p = app.engine.byPid(pid); if (p) app.engine.input(p.cid, d); });
+    net.on('live', (d, pid) => { if (!app.isHost && (pid === app.hostPid || !app.hostPid)) { app.live = d; app.liveAt = performance.now(); } });
     net.on('err', (d) => { toast(d.msg, true); if (d.fatal) leaveRoom(false); });
     net.onPeerJoin = (pid) => { if (!app.isHost) net.send('hello', hello(), pid); else hostSync(); app.voice?.peerJoined(pid); };
     net.onPeerLeave = (pid) => {
@@ -115,6 +119,7 @@ export function startTableRoom(spec) {
       app.engine.s.config = { ...app.engine.s.config, ...G.cleanConfig(app.engine.s.config, o) };
       if (TURN_TIMES.includes(Number(o.turnTime))) app.engine.s.config.turnTime = Number(o.turnTime);
       setInterval(() => app.engine.tick(), 300);
+      if (G.step) startLoop();
     } else {
       setTimeout(() => {
         if (!app.pub && app.net === net) {
@@ -124,6 +129,37 @@ export function startTableRoom(spec) {
       }, 15000);
     }
     setInterval(tickTimer, 250);
+  }
+  // vòng lặp 60 khung/giây của chủ phòng (dùng Worker để tab bị ẩn vẫn chạy đều)
+  function startLoop() {
+    const STEP = 1000 / 60;
+    let last = performance.now(), acc = 0, n = 0;
+    const run = () => {
+      const now = performance.now();
+      acc = Math.min(acc + now - last, 250);
+      last = now;
+      let stepped = false;
+      while (acc >= STEP) { acc -= STEP; if (app.engine.step()) stepped = true; n++; }
+      if (stepped || app.engine.s.phase === 'play') {
+        if (n >= 2) {
+          n = 0;
+          const d = app.engine.live();
+          if (d) { app.live = d; app.liveAt = now; app.net.send('live', d); }
+        }
+      }
+    };
+    try {
+      const w = new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),8)'], { type: 'text/javascript' })));
+      w.onmessage = run;
+    } catch { setInterval(run, 8); }
+  }
+  function sendInput(v) {
+    const key = JSON.stringify(v);
+    const now = performance.now();
+    if (key === app.myIn && now - app.inSentAt < 300) return;
+    app.myIn = key; app.inSentAt = now;
+    if (app.isHost) app.engine.input(app.cid, v);
+    else if (app.hostPid) app.net.send('in', v, app.hostPid);
   }
   function leaveRoom(ask = true) {
     const inGame = app.pub && app.pub.phase === 'play' && app.pub.order.includes(app.cid);
@@ -190,6 +226,7 @@ export function startTableRoom(spec) {
     return {
       pub, game: pub?.game, mySeat: mySeat(), isHost: app.isHost, local: app.local,
       act: (a) => act({ t: 'g', a }),
+      input: sendInput, live: () => app.live, liveAge: () => performance.now() - app.liveAt, cid: app.cid,
       player: (seat) => P(pub.order[seat]), seatCid: (seat) => pub.order[seat],
       esc, avatarHTML, toast, beep, rerender: () => renderGame(),
       remaining: () => (app.endsAt ? Math.max(0, app.endsAt - Date.now()) : 0),
@@ -298,7 +335,7 @@ export function startTableRoom(spec) {
     const ck = `${JSON.stringify(c)}|${ed}`;
     if (el.dataset.key === ck) return;
     el.dataset.key = ck;
-    const items = [...spec.cfg, { key: 'turnTime', label: 'Thời gian mỗi lượt', opts: TURN_TIMES.map((t) => [t, t ? t + 's' : 'Không giới hạn']) }];
+    const items = spec.noTurnTime ? [...spec.cfg] : [...spec.cfg, { key: 'turnTime', label: 'Thời gian mỗi lượt', opts: TURN_TIMES.map((t) => [t, t ? t + 's' : 'Không giới hạn']) }];
     el.innerHTML = `<div class="ro-row"><b>⚙️ Luật chơi</b><span class="muted">${ed ? '' : app.isHost ? '(đổi được khi chưa vào ván)' : '(chủ phòng chỉnh)'}</span></div>
       <div class="ro-grid">${items.map((it) => `<label>${it.label}${seg(it.key, it.opts)}</label>`).join('')}</div>
       <p class="ro-note">${spec.ruleNote}</p>`;

@@ -1568,3 +1568,51 @@ canvas.pp3d { display: block; width: 100% !important; height: 100% !important; m
 .dx-stats p { grid-column: 1 / -1; margin: 0; }
 .qc-port.dx-port { width: 120px; height: 85px; }
 @media (max-width: 760px) { .dx-select .qc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .dx-stats { grid-template-columns: 1fr; } }
+
+/* ===== Game thời gian thực trong phòng bàn (Đá Gà, Kéo Co, Xây Tháp) ===== */
+.rt-wrap { display: grid; gap: 10px; }
+.rt-canvas { width: 100%; height: auto; display: block; border-radius: 18px; border: 3px solid var(--edge, #1d1648); box-shadow: var(--shadow); background: #1d1648; touch-action: none; }
+.dg-wrap .rt-canvas { image-rendering: pixelated; image-rendering: crisp-edges; aspect-ratio: 960 / 600; }
+.rt-hint { font-size: 13px; color: var(--ink); opacity: .75; text-align: center; }
+.rt-hint kbd, .kc-panel kbd, .xt-tip kbd { display: inline-block; min-width: 20px; padding: 1px 6px; border-radius: 6px; border: 2px solid var(--edge, #1d1648); background: var(--surface); font: 700 11px/1.4 var(--font, system-ui); }
+.rt-pad { padding: 4px 0; }
+.rt-pad .qc-btns { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 260px; }
+.rt-pad .qc-btns button { height: 64px; font-size: 16px; }
+.rt-demo { width: 100%; max-width: 480px; height: auto; display: block; margin: 0 auto; border-radius: 16px; border: 3px solid #1d1648; image-rendering: pixelated; }
+/* Kéo co */
+.kc-canvas { aspect-ratio: 960 / 420; }
+.kc-panel { padding: 14px; text-align: center; }
+.kc-team { font-weight: 800; margin-bottom: 6px; }
+.kc-team b { color: var(--tc); }
+.kc-word { font: 800 clamp(30px, 6vw, 48px)/1.15 var(--display, system-ui); letter-spacing: .02em; margin: 4px 0; min-height: 1.2em; }
+.kc-word span.ok { color: #2fbf71; }
+.kc-word span.x { color: #ff4d5e; }
+.kc-word.shake { animation: kcShake .25s; }
+@keyframes kcShake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.kc-next { font-size: 14px; margin-bottom: 8px; }
+.kc-in { width: min(520px, 100%); font: 700 22px/1.2 var(--font, system-ui); padding: 12px 16px; border-radius: 14px; border: 3px solid var(--edge, #1d1648); background: var(--surface); color: var(--ink); text-align: center; }
+.kc-in.bad { border-color: #ff4d5e; background: #ffe3e6; color: #1d1648; }
+.kc-tip { font-size: 12px; margin-top: 8px; }
+.kc-tapbtn { width: min(420px, 100%); height: 150px; border-radius: 26px; border: 4px solid #1d1648; background: var(--tc); color: #fff; font: 900 44px/1 var(--display, system-ui); box-shadow: 0 7px 0 #1d1648; display: grid; place-content: center; gap: 8px; touch-action: manipulation; user-select: none; -webkit-user-select: none; margin: 6px auto; }
+.kc-tapbtn small { font: 700 13px/1.2 var(--font, system-ui); opacity: .9; }
+.kc-tapbtn.on { transform: translateY(5px); box-shadow: 0 2px 0 #1d1648; }
+.kc-cheer-btns { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+.kc-red { background: #ff4d5e !important; color: #fff !important; }
+.kc-blue { background: #3b82f6 !important; color: #fff !important; }
+.kc-done { font: 800 24px var(--display, system-ui); }
+/* Xây tháp */
+.xt-canvas { aspect-ratio: 960 / 600; cursor: ew-resize; }
+.xt-ctl { text-align: center; min-height: 30px; }
+.xt-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.xt-btns .btn { min-width: 58px; font-size: 20px; }
+.xt-btns .xt-drop { min-width: 130px; }
+.xt-tip { font-size: 12px; margin-top: 6px; }
+.xt-wait { padding: 6px; }
+.xt-btns .btn { width: auto; flex: 0 0 auto; }
+/* Kéo co: 16 ghế gọn hơn — mỗi đội 1 khối 4 cột */
+.keoco .tb-seats { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.keoco .tb-seat { padding: 6px 4px; font-size: 12px; gap: 2px; }
+.keoco .tb-seat .av, .keoco .tb-seat .avatar { width: 34px !important; height: 34px !important; font-size: 18px !important; }
+.keoco .tb-seat .btn.sm { padding: 4px 6px; font-size: 11px; }
+.keoco .tb-seat .tag, .keoco .tb-seat .muted { font-size: 10px; }
+@media (max-width: 700px) { .keoco .tb-seats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

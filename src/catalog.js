@@ -12,6 +12,9 @@ import { render as fightRender, FX as FightFX } from './fight/render.js';
 import { initState as fightInit } from './fight/sim.js';
 import { render as raceRender, FX as RaceFX } from './race/render.js';
 import { initState as raceInit } from './race/sim.js';
+import { dagaDemo } from './daga/view.js';
+import { keocoDemo } from './keoco/view.js';
+import { xaythapDemo } from './xaythap/view.js';
 const raceArt = (c) => { const S = raceInit(['cub', 'lam'], { seed: 3, time: 60 }); S.phase = 'race'; S.c[0].x = 1150 * 100; S.c[1].x = 1320 * 100; S.c[0].l = 110 * 100; S.c[1].l = 190 * 100; S.camX = 1100 * 100; raceRender(c, S, new RaceFX(), 30, { names: ['', ''], riders: ['🐧', '🦖'], crowd: [], me: 0 }); };
 const fightArt = (c) => { const S = fightInit(['teo', 'sam'], {}); S.phase = 'fight'; S.f[0].x = 400 * 100; S.f[1].x = 560 * 100; S.f[0].st = 'win'; fightRender(c, S, new FightFX(), 30, { names: ['', ''], crowd: ['🦊', '🐼', '🐸'] }); };
 
@@ -52,6 +55,24 @@ const GAMES = [
     tag: 'Đối kháng · Chiến thuật', players: '2 chơi + 8 xem', time: '10–30 phút',
     desc: 'Cờ vua quốc tế đầy đủ luật: nhập thành, bắt tốt qua đường, phong cấp. Đồng hồ cho mỗi bên, 8 người vào xem.',
     art: (el) => { el.innerHTML = '<div class="cv-art"></div>'; chessBoard.render(el.firstChild, { st: fromFEN('r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4'), flip: false, sel: -1, targets: [], last: { from: 31, to: 13 }, check: 4 }); },
+  },
+  {
+    id: 'daga', url: 'daga.html', name: 'Đá Gà Pixel', color: 'var(--sun)', soft: 'var(--sun-soft)', isNew: true,
+    tag: 'Hỗn chiến · Đẩy nhau', players: '1–8 gà + người xem', time: '2–4 phút',
+    desc: 'Mỗi người một con gà pixel trên sàn tròn co dần: húc, nhảy, dẫm đầu nhau cho văng xuống ao bùn. Con trụ lại cuối cùng thắng!',
+    art: (el) => dagaDemo(el),
+  },
+  {
+    id: 'keoco', url: 'keoco.html', name: 'Kéo Co Gõ Phím', color: 'var(--coral)', soft: 'var(--coral-soft)', isNew: true,
+    tag: 'Đồng đội · Gõ nhanh', players: 'Đỏ vs Xanh, tới 4–4', time: '1–2 phút',
+    desc: 'Hai đội gõ chữ thật nhanh để kéo dây, gõ đúng nhịp "Hò... DÔ!" được gấp đôi. Người xem bấm cổ vũ cũng kéo giúp!',
+    art: (el) => keocoDemo(el),
+  },
+  {
+    id: 'xaythap', url: 'xaythap.html', name: 'Xây Tháp Lắc Lư', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,
+    tag: 'Vật lý · Khéo tay', players: '1–4 người + xem', time: '3–8 phút',
+    desc: 'Thay phiên thả gạch, thùng gỗ, nón lá, dưa hấu lên chiếc bè tre dập dềnh. Ai làm rơi đồ xuống sông là thua!',
+    art: (el) => xaythapDemo(el),
   },
   {
     id: 'duaxe', url: 'duaxe.html', name: 'Đua Xe Đường Làng', color: 'var(--lime)', soft: 'var(--lime-soft)', isNew: true,

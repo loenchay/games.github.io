@@ -135,6 +135,29 @@ Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản 
 - Mạng: mỗi máy võ sĩ tự mô phỏng (tất định, số nguyên) và gửi phím bấm cho nhau; tín hiệu đối thủ tới trễ thì máy **đoán trước rồi tua lại** (rollback) nên vẫn mượt. Người xem vào giữa trận nhận ảnh chụp trận đấu rồi chạy tiếp.
 - Có nút **Tập với máy**. Code ở `src/fight/` (sim.js luật & va chạm, netplay.js đồng bộ, render.js vẽ, chars.js nhân vật, cpu.js máy đánh).
 
+## Đá Gà Pixel (1–8 gà)
+
+- Mỗi người ngồi ghế điều khiển một con gà pixel (8 giống gà màu khác nhau); thiếu người thì thêm **gà máy** (0–4 con, chơi 1 mình luôn có gà máy).
+- `WASD`/mũi tên đi, `J`/`Space` **húc** (lao tới, trúng là đối thủ văng đi + choáng), `K` **nhảy** (né cú húc; đáp xuống đầu gà khác thì dẫm choáng). Điện thoại có cần điều khiển + nút Húc/Nhảy.
+- Văng khỏi vòng rơm là rơi xuống ao bùn. Sau ~10 giây sàn co dần. Con trụ lại cuối cùng thắng hiệp; thắng đủ 1/2/3 hiệp là vô địch.
+- Vật phẩm: 🌽 bắp (3 cú húc cực mạnh), 🌶️ ớt (chạy nhanh), 🍌 vỏ chuối (dẫm phải trượt dài).
+- Chủ phòng chạy mô phỏng 60 khung/giây và gửi vị trí cho mọi người ~30 lần/giây; mỗi người gửi phím của mình lên. Code ở `src/daga/`.
+
+## Kéo Co Gõ Phím (Đỏ vs Xanh)
+
+- Ghế 1–4 là đội Đỏ, ghế 5–8 là đội Xanh (tới 4 đấu 4). Đội trống thì có người máy (yếu/vừa/khoẻ) vào kéo.
+- **Gõ chữ**: gõ đúng chữ hiện ra (có dấu hay không dấu đều được) là kéo dây; chữ dài kéo mạnh hơn, gõ liền mạch không sai thì chuỗi 🔥 tăng lực. **Bấm nhanh**: bấm nút KÉO / Space liên tục.
+- Nhịp "Hò... DÔ!" mỗi 4 giây: kéo đúng lúc DÔ được gấp đôi. Dải lụa qua vạch trắng là thắng; hết giờ thì đội đang dẫn thắng. Có tuỳ chọn cân sức khi hai đội lệch người.
+- Người xem bấm **Cổ vũ Đỏ/Xanh** — mỗi lần kéo giúp một chút xíu. Code ở `src/keoco/`.
+
+## Xây Tháp Lắc Lư (1–4 người)
+
+- Thay phiên thả đồ vật lên bè tre đang dập dềnh trên sông: gạch, thùng gỗ, bánh chưng, đốt tre, mâm đồng, bao gạo, ghế đẩu, chum, nón lá, dưa hấu...
+- Mỗi lượt dời trái/phải (`A/D`, mũi tên, kéo chuột/ngón tay trên hình), xoay 15° (`Q/E`, `↑`), thả (`Space`). Có giới hạn thời gian mỗi lượt.
+- Món nào rơi xuống sông là tháp sập: người thả món cuối thua, những người còn lại thắng. Tháp càng cao sóng càng lắc. Có thể thêm thợ máy; chơi 1 mình để thử kỷ lục.
+- Vật lý thật bằng thư viện planck.js (Box2D), chỉ chạy trên máy chủ phòng rồi gửi vị trí các món cho mọi người. Code ở `src/xaythap/`.
+- Ba game trên dùng chung phòng bàn chơi (`src/table/`) có thêm kênh thời gian thực (`step`/`live` trong `src/table/engine.js`).
+
 ## Đua Xe Đường Làng (2 người đua)
 
 - Góc nhìn sau lưng xe, lao thẳng về phía trước (giả 3D kiểu thùng game), đường chạy qua các làng (Đông Hồ, Bát Tràng, Vạn Phúc...). 6 loại xe: Cúp 50, Vespa Cổ, Dream Lùn, Xe Lam, Xe Đạp Điện, Công Nông — khác nhau về tốc độ, tăng tốc, lạng lách, sức húc.
