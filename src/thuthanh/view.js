@@ -1,9 +1,10 @@
-// Giao diện Thủ Thành Làng: bản đồ ô vuông nhìn từ trên xuống, bấm chọn loại chòi rồi bấm ô để xây.
-import { MW, MH, MAPS, TOWERS, ENEMIES, pathCells, posAt, PCOL } from './data.js';
+// Giao diện Thủ Thành Làng: bản đồ ô vuông nhìn từ trên xuống, chọn vũ khí rồi bấm ô cỏ để lắp.
+import { MW, MH, MAPS, TOWERS, TOWER_KEYS, ENEMIES, pathCells, blockedCell, posAt, PCOL, REFUND } from './data.js';
+import { CS, drawEnemy, drawTower, towerIcon, background } from './art.js';
 import { LiveBuf, lerp, loop, label, rr, touchDev, blip, noise } from '../rt/common.js';
 
-const CS = 48, W = MW * CS, H = MH * CS;
-const V = { ctx: null, buf: new LiveBuf(80), gameId: -1, pick: null, sel: null, hover: null, parts: [], tick: 0, banner: null, mapKey: '', bg: null };
+const W = MW * CS, H = MH * CS;
+const V = { ctx: null, buf: new LiveBuf(80), gameId: -1, pick: null, sel: null, hover: null, parts: [], tick: 0, banner: null, mapKey: '', bg: null, aim: {}, fireAt: {}, face: {}, lastPos: {}, shake: 0 };
 
 function build(el) {
   el.innerHTML = `<div class="rt-wrap tt-wrap"><canvas class="rt-canvas tt-canvas" width="${W}" height="${H}"></canvas>
@@ -21,7 +22,7 @@ function build(el) {
     const ctx = V.ctx, d = b.dataset;
     if (d.buy) { V.pick = V.pick === d.buy ? null : d.buy; V.sel = null; panelDirty(); }
     else if (d.up) ctx.act({ t: 'up', id: Number(d.up) });
-    else if (d.sell) { ctx.act({ t: 'sell', id: Number(d.sell) }); V.sel = null; }
+    else if (d.rm) { ctx.act({ t: 'remove', id: Number(d.rm) }); V.sel = null; }
     else if (d.unsel) { V.sel = null; panelDirty(); }
     else if (d.gift) ctx.act({ t: 'gift', to: Number(d.gift) });
     else if (d.next) ctx.act({ t: 'next' });
@@ -30,9 +31,10 @@ function build(el) {
 }
 addEventListener('keydown', (e) => {
   if (!V.ctx?.game || e.target.closest?.('input, textarea')) return;
-  const k = { Digit1: 'cung', Digit2: 'da', Digit3: 'bun', Digit4: 'phao' }[e.code];
-  if (k && V.ctx.mySeat >= 0) { V.pick = V.pick === k ? null : k; V.sel = null; panelDirty(); }
+  const n = /^Digit([1-9])$/.exec(e.code);
+  if (n && V.ctx.mySeat >= 0) { const k = TOWER_KEYS[Number(n[1]) - 1]; V.pick = V.pick === k ? null : k; V.sel = null; panelDirty(); }
   if (e.code === 'Escape') { V.pick = null; V.sel = null; panelDirty(); }
+  if ((e.code === 'KeyU') && V.sel) V.ctx.act({ t: 'up', id: V.sel });
 });
 const me = () => V.ctx.mySeat;
 const myGold = () => { const L = V.buf.last; return L && me() >= 0 ? L.gold[me()] : 0; };
@@ -51,36 +53,37 @@ function clickCell(x, y) {
   }
   V.sel = null; panelDirty();
 }
-let cellsCache = null;
+let cellsCache = {};
 function buildable(x, y) {
   const g = V.ctx.game, map = MAPS[g.map];
-  cellsCache ||= {}; cellsCache[g.map] ||= pathCells(map);
+  cellsCache[g.map] ||= pathCells(map);
   if (x < 0 || y < 0 || x >= MW || y >= MH) return false;
-  if (cellsCache[g.map].has(x + ',' + y)) return false;
-  if (map.water.some(([wx, wy, ww, wh]) => x >= wx && x < wx + ww && y >= wy && y < wy + wh)) return false;
-  if (x === map.gate[0] && Math.abs(y - map.gate[1]) <= 1) return false;
-  return !g.towers.some((t) => t[2] === x && t[3] === y);
+  return !blockedCell(map, cellsCache[g.map], x, y) && !g.towers.some((t) => t[2] === x && t[3] === y);
 }
 
 export const view = {
   phaseLabel: (ctx) => (ctx.game ? `Đợt ${Math.max(1, ctx.game.wave)}/${ctx.game.waves}` : ''),
   render(el, ctx) {
     V.ctx = ctx;
-    if (V.gameId !== ctx.pub.gameId) { V.gameId = ctx.pub.gameId; V.buf.reset(); V.parts = []; V.pick = null; V.sel = null; el.innerHTML = ''; V.bg = null; }
+    if (V.gameId !== ctx.pub.gameId) { V.gameId = ctx.pub.gameId; V.buf.reset(); V.parts = []; V.pick = null; V.sel = null; el.innerHTML = ''; V.bg = null; V.aim = {}; }
     if (!el.querySelector('canvas')) build(el);
+    if (V.sel && !ctx.game.towers.some((t) => t[0] === V.sel)) V.sel = null;
     panel(el.querySelector('#ttPanel'), ctx);
   },
-  fx(ev, ctx) {
-    if (ev.type === 'build') { blip([[440, 0.05], [660, 0.07]], 'square', 0.03); V.parts.push({ k: 'puff', x: ev.x + 0.5, y: ev.y + 0.5, t: 0, life: 24 }); }
-    else if (ev.type === 'up') { blip([[660, 0.05], [880, 0.05], [1100, 0.08]], 'square', 0.03); V.parts.push({ k: 'text', x: ev.x + 0.5, y: ev.y, t: 0, life: 45, text: 'NÂNG CẤP!', col: '#ffd43b' }); }
-    else if (ev.type === 'wave') { V.banner = { text: ev.boss ? `ĐỢT ${ev.w} · CHẰN TINH!` : `ĐỢT ${ev.w}`, t: 0, hot: ev.boss }; blip(ev.boss ? [[110, 0.3], [90, 0.4]] : [[330, 0.12], [440, 0.18]], 'sawtooth', 0.05); }
+  fx(ev) {
+    if (ev.type === 'build') { blip([[440, 0.05], [660, 0.07]], 'square', 0.03); puff(ev.x + 0.5, ev.y + 0.5, '#ffffff'); }
+    else if (ev.type === 'up') { blip([[660, 0.05], [880, 0.05], [1100, 0.08]], 'square', 0.03); const pk = TOWERS[ev.kind]?.perks[ev.lv - 1]; V.parts.push({ k: 'text', x: ev.x + 0.5, y: ev.y, t: 0, life: 70, text: pk ? `★ ${pk[0]}!` : 'NÂNG CẤP!', col: '#ffd43b' }); }
+    else if (ev.type === 'remove') { blip([[500, 0.05], [330, 0.08]], 'triangle', 0.03); puff(ev.x + 0.5, ev.y + 0.5, '#c9a25a'); V.parts.push({ k: 'text', x: ev.x + 0.5, y: ev.y, t: 0, life: 50, text: `+${ev.back} vàng`, col: '#ffd43b' }); }
+    else if (ev.type === 'wave') { V.banner = { text: ev.boss ? `ĐỢT ${ev.w} · ${ENEMIES[ev.boss].name.toUpperCase()}!` : `ĐỢT ${ev.w}`, t: 0, hot: !!ev.boss }; blip(ev.boss ? [[110, 0.3], [90, 0.4]] : [[330, 0.12], [440, 0.18]], 'sawtooth', 0.05); }
     else if (ev.type === 'leak') { noise(0.25, 0.08, 500); V.shake = 8; }
+    else if (ev.type === 'boom') { for (let i = 0; i < (ev.big ? 16 : 9); i++) V.parts.push({ k: 'spark', x: ev.x, y: ev.y, vx: (Math.random() - 0.5) * 0.12, vy: (Math.random() - 0.7) * 0.12, t: 0, life: 26, col: ev.big ? '#ff8a3d' : '#9a8f80' }); V.parts.push({ k: 'ring', x: ev.x, y: ev.y, r: ev.r, t: 0, life: 14, col: ev.big ? '#ffb020' : '#a0855e' }); if (ev.big) { noise(0.2, 0.06, 200); V.shake = Math.max(V.shake, 3); } }
     else if (ev.type === 'clear') { V.banner = { text: `Xong đợt ${ev.w}! +${ev.bonus} vàng`, t: 0 }; blip([[523, 0.08], [659, 0.08], [784, 0.15]], 'square', 0.04); }
     else if (ev.type === 'win') blip([[523, 0.12], [659, 0.12], [784, 0.12], [1046, 0.3]], 'square', 0.05);
-    else if (ev.type === 'lose') { noise(0.8, 0.12, 200); }
-    else if (ev.type === 'boss') V.banner = { text: 'HẠ ĐƯỢC CHẰN TINH!', t: 0 };
+    else if (ev.type === 'lose') noise(0.8, 0.12, 200);
+    else if (ev.type === 'boss') V.banner = { text: `HẠ ĐƯỢC ${ENEMIES[ev.t]?.name.toUpperCase() || 'TRÙM'}!`, t: 0 };
   },
 };
+function puff(x, y, col) { for (let q = 0; q < 8; q++) V.parts.push({ k: 'spark', x, y, vx: Math.cos(q) * 0.05, vy: Math.sin(q) * 0.05 - 0.02, t: 0, life: 22, col }); }
 
 // ---------- bảng điều khiển ----------
 function panel(el, ctx) {
@@ -88,7 +91,7 @@ function panel(el, ctx) {
   const g = ctx.game, m = ctx.mySeat, L = V.buf.last;
   const gold = L ? L.gold : g.gold;
   const selT = V.sel ? g.towers.find((t) => t[0] === V.sel) : null;
-  const afford = m >= 0 ? Object.values(TOWERS).map((T) => (gold[m] >= T.cost ? 1 : 0)).join('') + (selT && selT[4] < 2 && gold[m] >= TOWERS[selT[1]].up[selT[4]] ? 'u' : '') : '';
+  const afford = m >= 0 ? TOWER_KEYS.map((k) => (gold[m] >= TOWERS[k].cost ? 1 : 0)).join('') + (selT && selT[4] < 3 && gold[m] >= TOWERS[selT[1]].up[selT[4]] ? 'u' : '') : '';
   const key = `${ctx.pub.gameId}|${m}|${V.pick}|${V.sel}|${selT?.[4]}|${g.towers.length}|${g.ph}|${afford}|${L?.ph}|${ctx.pub.phase}`;
   if (el.dataset.key === key) return;
   el.dataset.key = key;
@@ -96,57 +99,27 @@ function panel(el, ctx) {
   const team = g.names.map((n, i) => `<span class="tt-mate" style="--pc:${PCOL[i]}">${i === m ? '★ ' : ''}${ctx.esc(n)} <b data-g="${i}">💰${gold[i]}</b>${m >= 0 && i !== m ? `<button class="btn sm" data-gift="${i}" title="Tặng 50 vàng">🎁</button>` : ''}</span>`).join('');
   let mid = '';
   if (m < 0) mid = '<div class="muted">👀 Bạn đang xem — cả phe cùng giữ làng, quái lọt vào cổng là mất máu.</div>';
-  else {
-    mid = `<div class="tt-shop">${Object.entries(TOWERS).map(([k, T], i) => `<button class="tt-buy ${V.pick === k ? 'on' : ''}" data-buy="${k}" ${gold[m] < T.cost ? 'disabled' : ''}><span class="ic">${T.icon}</span><b>${T.name}</b><small>💰${T.cost} · ${T.desc}</small>${touchDev ? '' : `<kbd>${i + 1}</kbd>`}</button>`).join('')}</div>`;
-  }
+  else mid = `<div class="tt-shop">${TOWER_KEYS.map((k, i) => { const T = TOWERS[k]; return `<button class="tt-buy ${V.pick === k ? 'on' : ''}" data-buy="${k}" ${gold[m] < T.cost ? 'disabled' : ''} title="${ctx.esc(T.desc)}"><img src="${towerIcon(k)}" alt=""><b>${T.name}</b><small>💰${T.cost}</small>${touchDev ? '' : `<kbd>${i + 1}</kbd>`}</button>`; }).join('')}</div>`;
   let sel = '';
   if (selT) {
-    const [id, kind, , , lv, own] = selT, T = TOWERS[kind];
-    const upCost = lv < 2 ? T.up[lv] : 0;
-    sel = `<div class="tt-sel"><b>${T.icon} ${T.name} cấp ${lv + 1}</b> <span class="muted">của ${ctx.esc(g.names[own])} · sát thương ${T.dmg[lv]} · tầm ${T.range[lv]} ô</span>
-      ${m >= 0 && lv < 2 ? `<button class="btn sm primary" data-up="${id}" ${gold[m] < upCost ? 'disabled' : ''}>⬆ Nâng cấp 💰${upCost}</button>` : lv >= 2 ? '<span class="tag ok">Tối đa</span>' : ''}
-      ${m === own ? `<button class="btn sm" data-sell="${id}">Bán lấy lại 70%</button>` : ''}
-      <button class="btn sm ghost" data-unsel="1">✕</button></div>`;
+    const [id, kind, , , lv, own] = selT, T = TOWERS[kind], S = T.lv[lv];
+    const upCost = lv < 3 ? T.up[lv] : 0, next = lv < 3 ? T.perks[lv] : null;
+    const stats = `sát thương ${S.dmg}${S.beam ? '/nhịp' : ''} · tầm ${S.range} ô · ${S.air ? 'bắn được quái bay' : 'chỉ đánh dưới đất'}`;
+    const perks = T.perks.map((p, i) => `<span class="tt-perk ${i < lv ? 'on' : ''}" title="${ctx.esc(p[1])}">${i < lv ? '✓' : '🔒'} ${ctx.esc(p[0])}</span>`).join('');
+    sel = `<div class="tt-sel"><img src="${towerIcon(kind, lv)}" alt=""><div class="tt-sel-info"><b>${T.name} · cấp ${lv + 1}/4</b> <span class="muted">của ${ctx.esc(g.names[own])}</span>
+      <div class="muted">${stats}</div><div class="tt-perks">${perks}</div>
+      ${next ? `<div class="tt-next">Lên cấp ${lv + 2}: <b>${ctx.esc(next[0])}</b> — ${ctx.esc(next[1])}</div>` : '<div class="tt-next">Đã nâng tối đa ⭐</div>'}</div>
+      <div class="tt-sel-btns">${m >= 0 && next ? `<button class="btn sm primary" data-up="${id}" ${gold[m] < upCost ? 'disabled' : ''}>⬆ Nâng cấp 💰${upCost}</button>` : ''}
+      ${m === own ? `<button class="btn sm" data-rm="${id}">🔧 Gỡ (+${Math.floor(T.cost * REFUND)} vàng)</button>` : ''}
+      <button class="btn sm ghost" data-unsel="1">✕</button></div></div>`;
+  } else if (V.pick && m >= 0) {
+    const T = TOWERS[V.pick];
+    sel = `<div class="tt-sel"><img src="${towerIcon(V.pick)}" alt=""><div class="tt-sel-info"><b>${T.name}</b> <span class="muted">💰${T.cost} · ${ctx.esc(T.desc)}</span>
+      <div class="tt-perks">${T.perks.map((p, i) => `<span class="tt-perk" title="${ctx.esc(p[1])}">Cấp ${i + 2}: ${ctx.esc(p[0])}</span>`).join('')}</div>
+      <div class="muted">Bấm vào ô cỏ trống trên bản đồ để lắp.</div></div></div>`;
   }
-  const next = L && L.ph === 'build' && m >= 0 ? `<button class="btn sun" data-next="1">📯 Gọi quái sớm (+vàng)</button>` : '';
-  el.innerHTML = `<div class="tt-team">${team}${next}</div>${mid}${sel}${m >= 0 && !touchDev ? '<div class="muted tt-tip">Chọn chòi (phím 1–4) rồi bấm ô cỏ trống để xây · bấm vào chòi để nâng cấp/bán · <kbd>Esc</kbd> bỏ chọn</div>' : m >= 0 ? '<div class="muted tt-tip">Chọn chòi rồi chạm ô cỏ trống để xây · chạm vào chòi để nâng cấp/bán</div>' : ''}`;
-
-}
-
-// ---------- nền bản đồ (vẽ 1 lần) ----------
-function background(g) {
-  const map = MAPS[g.map];
-  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-  const c = cv.getContext('2d');
-  const cells = pathCells(map);
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
-    c.fillStyle = (x + y) % 2 ? '#8fd16a' : '#97d873'; c.fillRect(x * CS, y * CS, CS, CS);
-    const h = (x * 73 + y * 151) % 17;
-    if (h < 3) { c.fillStyle = '#7cbf58'; c.fillRect(x * CS + 10 + h * 7, y * CS + 12 + h * 5, 4, 8); c.fillRect(x * CS + 14 + h * 7, y * CS + 8 + h * 5, 4, 12); }
-    if (h === 5) { c.fillStyle = '#fff6a8'; c.beginPath(); c.arc(x * CS + 30, y * CS + 30, 3, 0, 7); c.fill(); }
-  }
-  // nước
-  for (const [wx, wy, ww, wh] of map.water) {
-    c.fillStyle = '#4aa3d8'; rr(c, wx * CS + 3, wy * CS + 3, ww * CS - 6, wh * CS - 6, 16); c.fill();
-    c.fillStyle = '#6fbde8'; for (let i = 0; i < ww * wh; i++) c.fillRect(wx * CS + 12 + (i * 37) % (ww * CS - 30), wy * CS + 14 + (i * 23) % (wh * CS - 26), 14, 3);
-    c.font = '20px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🪷', wx * CS + 22, wy * CS + 22);
-  }
-  // đường đất
-  c.lineCap = 'round'; c.lineJoin = 'round';
-  for (const [w, col] of [[CS * 0.9, '#a5783f'], [CS * 0.76, '#d9b06a']]) {
-    for (const p of map.paths) { c.strokeStyle = col; c.lineWidth = w; c.beginPath(); p.forEach(([x, y], i) => (i ? c.lineTo((x + 0.5) * CS, (y + 0.5) * CS) : c.moveTo((x + 0.5) * CS, (y + 0.5) * CS))); c.stroke(); }
-  }
-  c.fillStyle = 'rgba(160,110,50,.35)';
-  for (const k of cells) { const [x, y] = k.split(',').map(Number); for (let i = 0; i < 3; i++) c.fillRect(x * CS + 8 + ((x * 7 + y * 13 + i * 17) % 30), y * CS + 10 + ((x * 11 + i * 19) % 28), 3, 3); }
-  // lối vào
-  for (const p of map.paths) { const [x, y] = p[1]; const sy = (p[0][1] + 0.5) * CS; label(c, '➤', 10, sy, { size: 22, color: '#ff4d5e', w: 3, align: 'left' }); void x; void y; }
-  // cổng làng
-  const [gx, gy] = map.gate, cx = Math.min(W - 48, (gx + 0.5) * CS), cy = (gy + 0.5) * CS;
-  c.fillStyle = '#8b4a2b'; c.fillRect(cx - 34, cy - 40, 10, 70); c.fillRect(cx + 24, cy - 40, 10, 70);
-  c.fillStyle = '#c0392b'; c.beginPath(); c.moveTo(cx - 46, cy - 38); c.quadraticCurveTo(cx, cy - 66, cx + 46, cy - 38); c.lineTo(cx + 40, cy - 30); c.quadraticCurveTo(cx, cy - 52, cx - 40, cy - 30); c.closePath(); c.fill();
-  c.fillStyle = '#ffd43b'; rr(c, cx - 24, cy - 34, 48, 16, 4); c.fill();
-  c.fillStyle = '#7a2e1d'; c.font = '900 11px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('LÀNG', cx, cy - 26);
-  return cv;
+  const nextBtn = L && L.ph === 'build' && m >= 0 ? `<button class="btn sun" data-next="1">📯 Gọi quái sớm (+vàng)</button>` : '';
+  el.innerHTML = `<div class="tt-team">${team}${nextBtn}</div>${mid}${sel}${m >= 0 ? `<div class="muted tt-tip">${touchDev ? 'Chọn vũ khí rồi chạm ô cỏ trống để lắp · chạm vào vũ khí để nâng cấp/gỡ' : 'Chọn vũ khí (phím 1–9) rồi bấm ô cỏ trống · bấm vào vũ khí để nâng cấp (<kbd>U</kbd>) hoặc gỡ · <kbd>Esc</kbd> bỏ chọn'} · gỡ được hoàn ${REFUND * 100}% giá lắp</div>` : ''}`;
 }
 
 // ---------- vẽ ----------
@@ -161,76 +134,101 @@ function draw() {
     const el = document.getElementById('ttPanel');
     if (el) { panel(el, ctx); el.querySelectorAll('[data-g]').forEach((b) => { b.textContent = '💰' + V.buf.last.gold[+b.dataset.g]; }); }
   }
-  if (V.mapKey !== g.map || !V.bg) { V.bg = background(g); V.mapKey = g.map; cellsCache = null; }
+  if (V.mapKey !== g.map || !V.bg) { V.bg = background(g.map); V.mapKey = g.map; }
+  const map = MAPS[g.map];
   c.save();
   if (V.shake > 0) { c.translate((Math.random() - 0.5) * V.shake, (Math.random() - 0.5) * V.shake); V.shake--; }
   c.drawImage(V.bg, 0, 0);
-  const map = MAPS[g.map];
+  // vị trí quái (nội suy)
+  const list = [], posOf = new Map();
+  if (L) {
+    const amap = new Map((smp.a.e || []).map((e) => [e[0], e]));
+    for (const e of L.e) {
+      const a = amap.get(e[0]);
+      const d = a ? lerp(a[3], e[3], smp.k) : e[3];
+      const p = posAt(map.paths[e[2]], d / 100);
+      // hướng mặt theo chiều đi
+      const prev = V.lastPos[e[0]];
+      if (prev && Math.abs(p[0] - prev[0]) > 0.003) V.face[e[0]] = p[0] > prev[0] ? 1 : -1;
+      V.lastPos[e[0]] = p;
+      posOf.set(e[0], p);
+      list.push({ e, p });
+    }
+  }
+  // hướng nòng súng + lúc bắn
+  const fNow = L ? L.f + Math.min(6, (ctx.liveAge() * 60) / 1000) : 0;
+  if (L) for (const sh of L.s) {
+    const [tid, eid, f] = sh;
+    const tgt = typeof eid === 'number' ? posOf.get(eid) : Array.isArray(eid) ? posOf.get(eid[0]) : null;
+    const t = g.towers.find((q) => q[0] === tid);
+    if (t && tgt) V.aim[tid] = Math.atan2(tgt[1] - (t[3] + 0.5), tgt[0] - (t[2] + 0.5));
+    V.fireAt[tid] = Math.max(V.fireAt[tid] || 0, f);
+  }
   // ô đang chỉ
   if (V.hover && V.pick && me() >= 0) {
     const [hx, hy] = V.hover, ok = buildable(hx, hy);
     c.fillStyle = ok ? 'rgba(255,255,255,.35)' : 'rgba(255,60,60,.35)'; c.fillRect(hx * CS, hy * CS, CS, CS);
-    if (ok) { c.strokeStyle = 'rgba(29,22,72,.5)'; c.setLineDash([6, 6]); c.lineWidth = 2; c.beginPath(); c.arc((hx + 0.5) * CS, (hy + 0.5) * CS, TOWERS[V.pick].range[0] * CS, 0, 7); c.stroke(); c.setLineDash([]); c.globalAlpha = 0.6; tower(c, V.pick, hx, hy, 0, me()); c.globalAlpha = 1; }
+    if (ok) { c.strokeStyle = 'rgba(29,22,72,.5)'; c.setLineDash([6, 6]); c.lineWidth = 2; c.beginPath(); c.arc((hx + 0.5) * CS, (hy + 0.5) * CS, TOWERS[V.pick].lv[0].range * CS, 0, 7); c.stroke(); c.setLineDash([]); c.globalAlpha = 0.6; drawTower(c, V.pick, (hx + 0.5) * CS, (hy + 0.5) * CS, 0, me(), -Math.PI / 2, V.tick); c.globalAlpha = 1; }
   }
-  // chòi
+  // vũ khí
   for (const [id, kind, x, y, lv, own] of g.towers) {
-    if (id === V.sel) { c.fillStyle = 'rgba(255,212,59,.18)'; c.beginPath(); c.arc((x + 0.5) * CS, (y + 0.5) * CS, TOWERS[kind].range[lv] * CS, 0, 7); c.fill(); c.strokeStyle = '#ffd43b'; c.lineWidth = 2; c.stroke(); }
-    tower(c, kind, x, y, lv, own);
+    if (id === V.sel) { c.fillStyle = 'rgba(255,212,59,.16)'; c.beginPath(); c.arc((x + 0.5) * CS, (y + 0.5) * CS, TOWERS[kind].lv[lv].range * CS, 0, 7); c.fill(); c.strokeStyle = '#ffd43b'; c.lineWidth = 2; c.stroke(); }
+    const fire = fNow - (V.fireAt[id] ?? -99) < 6 ? 1 : 0;
+    drawTower(c, kind, (x + 0.5) * CS, (y + 0.5) * CS, lv, own, V.aim[id] ?? -Math.PI / 2, V.tick, fire);
   }
-  // quái
-  const posOf = new Map();
+  // quái (xa trước gần sau)
+  list.sort((a, b) => a.p[1] - b.p[1]);
+  for (const { e, p } of list) {
+    const E = ENEMIES[e[1]], x = p[0] * CS, y = p[1] * CS, px = CS * E.size;
+    drawEnemy(c, e[1], x, y, px, V.tick + e[0] * 7, V.face[e[0]] || 1, e[5], !!E.fly);
+    const bw = E.boss ? 48 : Math.max(24, px * 0.7), hpk = e[4] / 100, by = y - px * (E.fly ? 0.95 : 0.7) - (E.boss ? 14 : 0);
+    c.fillStyle = '#1d1648'; c.fillRect(x - bw / 2 - 1, by - 1, bw + 2, 6);
+    c.fillStyle = hpk > 0.5 ? '#2fbf71' : hpk > 0.25 ? '#ffc43d' : '#ff4d5e'; c.fillRect(x - bw / 2, by, bw * hpk, 4);
+    if (E.boss) label(c, E.name, x, by - 10, { size: 12, color: '#ff8787', w: 3 });
+  }
+  // đạn, tia
   if (L) {
-    const amap = new Map((smp.a.e || []).map((e) => [e[0], e]));
-    const list = L.e.map((e) => { const a = amap.get(e[0]); const d = a ? lerp(a[3], e[3], smp.k) : e[3]; const p = posAt(map.paths[e[2]], d / 100); return { e, p }; });
-    list.sort((a, b) => a.p[1] - b.p[1]);
-    for (const { e, p } of list) {
-      posOf.set(e[0], p);
-      const E = ENEMIES[e[1]], x = p[0] * CS, y = p[1] * CS, sz = E.boss ? 44 : E.fly ? 26 : e[1] === 'trau' ? 32 : 26;
-      const bob = Math.sin(V.tick / 5 + e[0]) * (E.fly ? 4 : 1.5);
-      c.fillStyle = 'rgba(0,0,0,.2)'; c.beginPath(); c.ellipse(x, y + sz * 0.38, sz * 0.4, sz * 0.14, 0, 0, 7); c.fill();
-      if (e[5]) { c.fillStyle = 'rgba(120,80,40,.55)'; c.beginPath(); c.ellipse(x, y + sz * 0.35, sz * 0.5, sz * 0.18, 0, 0, 7); c.fill(); }
-      c.font = `${sz}px system-ui`; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillText(E.icon, x, y - (E.fly ? 10 : 0) + bob);
-      // thanh máu
-      const bw = E.boss ? 46 : 28, hpk = e[4] / 100;
-      c.fillStyle = '#1d1648'; c.fillRect(x - bw / 2 - 1, y - sz * 0.62 - 1 - (E.fly ? 10 : 0), bw + 2, 6);
-      c.fillStyle = hpk > 0.5 ? '#2fbf71' : hpk > 0.25 ? '#ffc43d' : '#ff4d5e'; c.fillRect(x - bw / 2, y - sz * 0.62 - (E.fly ? 10 : 0), bw * hpk, 4);
-    }
-    // đạn
-    const fNow = L.f + Math.min(6, (ctx.liveAge() * 60) / 1000);
     const tw = new Map(g.towers.map((t) => [t[0], t]));
-    for (const [tid, eid, f, kind, tx, ty] of L.s) {
+    for (const sh of L.s) {
+      const [tid, eid, f, kind, tx, ty] = sh;
       const t = tw.get(tid); if (!t) continue;
       const sx = (t[2] + 0.5) * CS, sy = (t[3] + 0.5) * CS, age = fNow - f;
-      if (kind === 0) { const p = posOf.get(eid); if (!p || age > 8) continue; const k = age / 8; const ex = p[0] * CS, ey = p[1] * CS; const ax = lerp(sx, ex, k), ay = lerp(sy - 14, ey, k); c.strokeStyle = '#5a3b1f'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax - (ex - sx) * 0.08, ay - (ey - sy) * 0.08); c.stroke(); }
-      else if (kind === 1) { const k = Math.min(1, age / 22), ex = (tx / 100) * CS, ey = (ty / 100) * CS; if (age <= 22) { const ax = lerp(sx, ex, k), ay = lerp(sy, ey, k) - Math.sin(k * Math.PI) * 60; c.fillStyle = '#7d7d8a'; c.beginPath(); c.arc(ax, ay, 6, 0, 7); c.fill(); c.strokeStyle = '#1d1648'; c.lineWidth = 2; c.stroke(); } else if (age < 30) { c.strokeStyle = `rgba(120,90,60,${1 - (age - 22) / 8})`; c.lineWidth = 4; c.beginPath(); c.arc(ex, ey, 10 + (age - 22) * 6, 0, 7); c.stroke(); } }
-      else if (kind === 2 && age < 16) { const R = TOWERS.phao.range[t[4]] * CS * (age / 16); c.strokeStyle = `rgba(255,120,40,${1 - age / 16})`; c.lineWidth = 6; c.beginPath(); c.arc(sx, sy, R, 0, 7); c.stroke(); c.fillStyle = '#ffd43b'; for (let q = 0; q < 6; q++) { const a = q + age * 0.3; c.fillRect(sx + Math.cos(a) * R - 2, sy + Math.sin(a) * R - 2, 4, 4); } }
-      else if (kind === 3 && age < 18) { c.strokeStyle = `rgba(110,75,40,${0.6 - age / 30})`; c.lineWidth = 3; c.beginPath(); c.arc(sx, sy, 16 + age * 3, 0, 7); c.stroke(); }
+      if (kind === 0 || kind === 8 || kind === 9) {
+        const p = posOf.get(eid), dur = kind === 8 ? 4 : 8; if (!p || age > dur) continue;
+        const k = Math.max(0, age / dur), ex = p[0] * CS, ey = p[1] * CS, ax = lerp(sx, ex, k), ay = lerp(sy - 10, ey - 6, k);
+        if (kind === 8) { c.strokeStyle = '#ffe066'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax - (ex - sx) * 0.15, ay - (ey - sy) * 0.15); c.stroke(); }
+        else if (kind === 9) { c.fillStyle = '#bfefff'; c.beginPath(); c.arc(ax, ay, 5, 0, 7); c.fill(); c.strokeStyle = '#3fa7e0'; c.lineWidth = 1.5; c.stroke(); }
+        else { c.strokeStyle = '#5a3b1f'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax - (ex - sx) * 0.1, ay - (ey - sy) * 0.1); c.stroke(); if (TOWERS.cung.lv[t[4]].burn) { c.fillStyle = '#ff8a3d'; c.beginPath(); c.arc(ax, ay, 3, 0, 7); c.fill(); } }
+      } else if (kind === 1 || kind === 7) {
+        const dur = kind === 7 ? 18 : 22, k = Math.min(1, age / dur), ex = (tx / 100) * CS, ey = (ty / 100) * CS;
+        if (age <= dur) { const ax = lerp(sx, ex, k), ay = lerp(sy, ey, k) - Math.sin(k * Math.PI) * (kind === 7 ? 40 : 60); c.fillStyle = kind === 7 ? '#22222c' : '#7d7d8a'; c.beginPath(); c.arc(ax, ay, kind === 7 ? 7 : 6, 0, 7); c.fill(); c.strokeStyle = '#1d1648'; c.lineWidth = 2; c.stroke(); }
+      } else if (kind === 2 && age < 16) {
+        const R = TOWERS.phao.lv[t[4]].range * CS * (age / 16); c.strokeStyle = `rgba(255,120,40,${1 - age / 16})`; c.lineWidth = 6; c.beginPath(); c.arc(sx, sy, R, 0, 7); c.stroke(); c.fillStyle = '#ffd43b'; for (let q = 0; q < 8; q++) { const a = q * 0.8 + age * 0.3; c.fillRect(sx + Math.cos(a) * R - 2, sy + Math.sin(a) * R - 2, 4, 4); }
+      } else if (kind === 3 && age < 18) { c.strokeStyle = `rgba(110,75,40,${0.6 - age / 30})`; c.lineWidth = 3; c.beginPath(); c.arc(sx, sy, 16 + age * 3, 0, 7); c.stroke(); }
+      else if (kind === 6 && age < 18) { const R = TOWERS.bang.lv[t[4]].range * CS * (age / 18); c.strokeStyle = `rgba(160,225,255,${1 - age / 18})`; c.lineWidth = 7; c.beginPath(); c.arc(sx, sy, R, 0, 7); c.stroke(); c.fillStyle = '#fff'; for (let q = 0; q < 10; q++) { const a = q * 0.63; c.fillRect(sx + Math.cos(a) * R - 1.5, sy + Math.sin(a) * R - 1.5, 3, 3); } }
+      else if (kind === 4 && age < 10 && Array.isArray(eid)) {
+        let px0 = sx, py0 = sy - 15;
+        c.strokeStyle = `rgba(191,227,255,${1 - age / 10})`; c.lineWidth = 3; c.lineJoin = 'round';
+        for (const id2 of eid) { const p = posOf.get(id2); if (!p) continue; const ex = p[0] * CS, ey = p[1] * CS - 6; c.beginPath(); c.moveTo(px0, py0); for (let q = 1; q < 5; q++) c.lineTo(lerp(px0, ex, q / 5) + (Math.random() - 0.5) * 10, lerp(py0, ey, q / 5) + (Math.random() - 0.5) * 10); c.lineTo(ex, ey); c.stroke(); px0 = ex; py0 = ey; }
+        c.lineWidth = 1.2; c.strokeStyle = '#fff'; c.stroke();
+      } else if (kind === 5 && age < 7) {
+        const p = posOf.get(eid); if (!p) continue;
+        const heat = (tx || 0) / 100, ex = p[0] * CS, ey = p[1] * CS - 6;
+        c.strokeStyle = `rgba(255,${Math.round(150 - heat * 120)},${Math.round(220 - heat * 150)},.85)`; c.lineWidth = 3 + heat * 5; c.beginPath(); c.moveTo(sx, sy - 10); c.lineTo(ex, ey); c.stroke();
+        c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.stroke();
+        c.fillStyle = '#ffd6ec'; c.beginPath(); c.arc(ex, ey, 4 + heat * 4 + Math.random() * 2, 0, 7); c.fill();
+      }
     }
   }
   // hạt
   V.parts = V.parts.filter((p) => ++p.t < p.life);
   for (const p of V.parts) {
-    if (p.k === 'puff') { c.fillStyle = `rgba(255,255,255,${1 - p.t / p.life})`; for (let q = 0; q < 6; q++) { const a = q * 1.05; c.beginPath(); c.arc(p.x * CS + Math.cos(a) * p.t * 1.2, p.y * CS + Math.sin(a) * p.t * 1.2, 6, 0, 7); c.fill(); } }
+    if (p.k === 'spark') { p.x += p.vx; p.y += p.vy; p.vy += 0.004; c.fillStyle = p.col; c.globalAlpha = 1 - p.t / p.life; c.fillRect(p.x * CS - 3, p.y * CS - 3, 6, 6); c.globalAlpha = 1; }
+    else if (p.k === 'ring') { c.strokeStyle = p.col; c.globalAlpha = 1 - p.t / p.life; c.lineWidth = 4; c.beginPath(); c.arc(p.x * CS, p.y * CS, p.r * CS * (0.4 + (p.t / p.life) * 0.6), 0, 7); c.stroke(); c.globalAlpha = 1; }
     else label(c, p.text, p.x * CS, p.y * CS - p.t * 0.5, { size: 15, color: p.col, w: 4 });
   }
   c.restore();
   hud(c, g, L);
-}
-function tower(c, kind, x, y, lv, own) {
-  const cx = (x + 0.5) * CS, cy = (y + 0.5) * CS;
-  if (kind === 'bun') {
-    c.fillStyle = '#7a5532'; c.beginPath(); c.ellipse(cx, cy + 4, 20, 14, 0, 0, 7); c.fill();
-    c.fillStyle = '#946a40'; c.beginPath(); c.ellipse(cx, cy + 2, 15, 9, 0, 0, 7); c.fill();
-    c.strokeStyle = PCOL[own] || '#fff'; c.lineWidth = 3; c.beginPath(); c.ellipse(cx, cy + 4, 21, 15, 0, 0, 7); c.stroke();
-    c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy + 2, 6 + (V.tick / 4) % 8, 0, 7); c.stroke();
-  } else {
-    c.fillStyle = '#1d1648'; rr(c, cx - 19, cy - 15, 38, 34, 8); c.fill();
-    c.fillStyle = kind === 'cung' ? '#b07a3c' : kind === 'da' ? '#8a8a96' : '#5e9e3a'; rr(c, cx - 17, cy - 13, 34, 30, 7); c.fill();
-    c.fillStyle = PCOL[own] || '#fff'; c.fillRect(cx - 17, cy + 11, 34, 6);
-    c.font = '22px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(TOWERS[kind].icon, cx, cy - 1);
-  }
-  for (let i = 0; i <= lv && lv > 0; i++) { c.fillStyle = '#ffd43b'; c.beginPath(); c.arc(cx - 8 + i * 8, cy - 19, 3.5, 0, 7); c.fill(); c.strokeStyle = '#1d1648'; c.lineWidth = 1.5; c.stroke(); }
 }
 function hud(c, g, L) {
   if (!L) return;
@@ -238,7 +236,8 @@ function hud(c, g, L) {
   const txt = L.ph === 'build' ? `⏳ Đợt ${L.wave + 1} tới sau ${Math.ceil(L.cd / 60)}s` : L.ph === 'wave' ? `⚔️ Đợt ${L.wave}/${g.waves} · còn ${L.left} con` : L.ph === 'win' ? '🎉 Giữ làng thành công!' : '💥 Làng bị phá!';
   label(c, txt, W / 2 - 60, 24, { size: 16, w: 3 });
   label(c, `❤️ ${L.lives}`, W / 2 + 150, 24, { size: 18, w: 3, color: L.lives <= 5 ? '#ff8787' : '#fff' });
-  if (V.banner) { V.banner.t++; if (V.banner.t > 110) V.banner = null; else label(c, V.banner.text, W / 2, H / 2 - 30, { size: 52, color: V.banner.hot ? '#ff4d5e' : '#ffd43b', w: 10, font: '"Bricolage Grotesque",system-ui' }); }
+  label(c, MAPS[g.map].name, 10, H - 14, { size: 12, align: 'left', w: 3 });
+  if (V.banner) { V.banner.t++; if (V.banner.t > 110) V.banner = null; else label(c, V.banner.text, W / 2, H / 2 - 30, { size: 46, color: V.banner.hot ? '#ff4d5e' : '#ffd43b', w: 10, font: '"Bricolage Grotesque",system-ui' }); }
   if (L.ph === 'lose') label(c, 'LÀNG ĐÃ BỊ PHÁ!', W / 2, H / 2, { size: 60, color: '#ff4d5e', w: 12, font: '"Bricolage Grotesque",system-ui' });
   if (L.ph === 'win') label(c, 'GIỮ LÀNG THÀNH CÔNG!', W / 2, H / 2, { size: 56, color: '#ffd43b', w: 12, font: '"Bricolage Grotesque",system-ui' });
 }
@@ -251,10 +250,10 @@ export function thuthanhDemo(el) {
     if (!el.isConnected) return;
     t++;
     c.fillStyle = '#93d46e'; c.fillRect(0, 0, 320, 120);
-    c.strokeStyle = '#d9b06a'; c.lineWidth = 22; c.lineCap = 'round'; c.beginPath(); c.moveTo(-10, 40); c.lineTo(150, 40); c.lineTo(150, 85); c.lineTo(330, 85); c.stroke();
-    c.font = '22px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText('🏹', 110, 75); c.fillText('🧨', 200, 55); c.fillText('🪨', 260, 108);
-    for (let i = 0; i < 4; i++) { const d = ((t * 0.8 + i * 70) % 400); const [x, y] = d < 160 ? [d, 40] : d < 205 ? [150, 40 + d - 160] : [150 + d - 205, 85]; c.fillText(['🐀', '🐗', '🐀', '🐃'][i], x, y - 2); }
+    c.strokeStyle = '#d9b06a'; c.lineWidth = 24; c.lineCap = 'round'; c.beginPath(); c.moveTo(-10, 40); c.lineTo(150, 40); c.lineTo(150, 85); c.lineTo(330, 85); c.stroke();
+    drawTower(c, 'daibac', 110, 80, 1, 0, -0.8, t, 0); drawTower(c, 'dien', 200, 50, 2, 1, 0, t, 0); drawTower(c, 'laze', 270, 40, 3, 2, 1.6, t, 0);
+    const mons = ['chuot', 'heo', 'rua', 'trau'];
+    for (let i = 0; i < 4; i++) { const d = ((t * 0.8 + i * 70) % 400); const [x, y, f] = d < 160 ? [d, 40, 1] : d < 205 ? [150, 40 + d - 160, 1] : [150 + d - 205, 85, 1]; drawEnemy(c, mons[i], x, y, 26, t + i * 9, f); }
     requestAnimationFrame(step);
   };
   step();

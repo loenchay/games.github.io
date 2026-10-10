@@ -12,6 +12,6 @@ startTableRoom({
     { key: 'waves', label: 'Số đợt quái', opts: [[10, '10 đợt'], [20, '20 đợt'], [30, '30 đợt']] },
     { key: 'diff', label: 'Độ khó', opts: [['easy', 'Dễ'], ['normal', 'Vừa'], ['hard', 'Khó']] },
   ],
-  ruleNote: 'Cả phe cùng giữ làng. Quái (chuột đồng, heo rừng, trâu điên, quạ đen, mỗi 10 đợt có Chằn Tinh) đi theo đường đất về cổng làng — lọt vào là làng mất máu, hết 20 máu là thua. Mỗi người có vàng riêng để xây chòi: 🏹 Chòi cung (nhanh, bắn được chim), 🪨 Máy bắn đá (nổ một vùng), 🌀 Ao bùn (làm chậm), 🧨 Pháo tre (nổ quanh chòi). Ai nâng cấp chòi nào cũng được, chỉ chủ chòi mới bán. Vàng từ mỗi con quái chia đều cho cả phe; có thể tặng vàng cho đồng đội. Gọi quái sớm được thưởng thêm vàng.',
+  ruleNote: 'Cả phe cùng giữ làng. Quái đi theo đường đất về cổng làng: chuột đồng, heo rừng, trâu điên, rùa giáp (đỡ đòn, cần vũ khí xuyên giáp), quạ đen và ong vò vẽ (bay), cùng 2 trùm Chằn Tinh và Thuồng Luồng (tự hồi máu). Lọt cổng là mất máu, hết 20 máu là thua. 9 loại vũ khí: chòi cung, súng máy, máy bắn đá, đại bác, ao bùn, máy phun băng, pháo tre, cột điện, tia laze — mỗi loại nâng được 4 cấp, mỗi cấp mở thêm một tính năng (tên lửa, xuyên giáp, đóng băng, sét nảy...). Gỡ vũ khí được hoàn 50% giá lắp ban đầu. Vàng từ quái chia đều cả phe, tặng nhau được; gọi quái sớm được thưởng vàng.',
   demo: (el) => el && thuthanhDemo(el),
 });

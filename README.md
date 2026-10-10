@@ -144,10 +144,17 @@ Cả phòng nghe một âm mẫu rồi cùng thu âm nhại lại. Từng bản 
 
 ## Thủ Thành Làng (1–4 người cùng phe)
 
-- Quái đi theo đường đất về cổng làng: 🐀 chuột đồng (nhanh), 🐗 heo rừng, 🐃 trâu điên (trâu, mất 2 máu), 🐦‍⬛ quạ đen (bay), mỗi 10 đợt có 👹 Chằn Tinh. Lọt cổng là làng mất máu, hết 20 máu là thua.
-- Mỗi người có vàng riêng để xây: 🏹 Chòi cung (nhanh, bắn được chim) · 🪨 Máy bắn đá (nổ một vùng, không trúng chim) · 🌀 Ao bùn (làm chậm) · 🧨 Pháo tre (nổ quanh chòi, trúng cả chim). Nâng cấp 3 cấp, chủ chòi bán lại được 70%.
-- Vàng từ mỗi con quái chia đều cho cả phe; có nút 🎁 tặng 50 vàng cho đồng đội; gọi quái sớm được thưởng vàng. 3 bản đồ (Đường Làng, Ngã Ba Sông có 2 lối vào, Vòng Xoáy), 10/20/30 đợt, 3 độ khó. Máu quái tăng theo số người chơi.
-- Code ở `src/thuthanh/`.
+- Quái (vẽ tay, có hoạt hình): 🐀 chuột đồng, 🐗 heo rừng, 🐃 trâu điên, 🐢 rùa giáp (giáp trừ sát thương mỗi phát), 🐦‍⬛ quạ đen và 🐝 ong vò vẽ (bay), trùm 👹 Chằn Tinh (đợt 10, 20, 30) và 🐉 Thuồng Luồng (tự hồi máu, đợt 15, 25). Lọt cổng là làng mất máu, hết 20 máu là thua.
+- 9 vũ khí, mỗi loại 4 cấp, mỗi lần nâng mở một tính năng:
+  - Chòi cung: tên đôi → tên lửa (đốt) → mưa tên · Súng máy: xuyên giáp → băng đạn lớn → chí mạng
+  - Máy bắn đá: đá tảng → đá choáng → mưa đá · Đại bác: đạn cháy → nòng dài → pháo kép phòng không
+  - Ao bùn: bùn sâu → đỉa → đầm lầy · Máy phun băng: lạnh buốt → đóng băng → bão tuyết
+  - Pháo tre: pháo đại → pháo hoa (choáng) → pháo dây · Cột điện: dây đồng → giật tê → sấm sét (nảy 6 con)
+  - Tia laze: hội tụ (chiếu lâu nóng gấp 3) → tia đôi → tia tử thần; luôn xuyên giáp
+- **Gỡ vũ khí** (chỉ người lắp): hoàn 50% giá lắp ban đầu. Ai cũng nâng cấp được vũ khí của đồng đội.
+- Vàng từ mỗi con quái chia đều cho cả phe; nút 🎁 tặng 50 vàng; gọi quái sớm được thưởng vàng.
+- 8 bản đồ: Đường Làng, Ngã Ba Sông (2 lối), Vòng Xoáy, Ruộng Bậc Thang, Bãi Biển (2 lối), Rừng Tre 3 Lối, Đồi Chè (quái đi từ phải sang), Núi Đá (nhiều đá chắn). 10/20/30 đợt, 3 độ khó; máu quái tăng theo số người chơi, giảm nhẹ ở bản đồ nhiều lối.
+- Code ở `src/thuthanh/` (`data.js` dữ liệu, `logic.js` mô phỏng, `art.js` hình vẽ, `view.js` giao diện).
 
 ## Đá Gà Pixel (1–8 gà)
 
